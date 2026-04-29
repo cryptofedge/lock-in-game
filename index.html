@@ -8,6 +8,8 @@
 <meta name="theme-color" content="#0D0D0D"/>
 <meta name="description" content="A choice-based mental health game for urban youth. Built by FEDGE 2.O."/>
 <link rel="manifest" href="manifest.json"/>
+<link rel="icon" href="logo.png" type="image/png"/>
+<link rel="apple-touch-icon" href="logo.png"/>
 <title>LOCK IN</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600;700;800&display=swap');
@@ -17,12 +19,13 @@
   --purple:#9B5DE5; --coral:#FF6B6B; --mint:#6BCB77;
   --dark:#0D0D0D; --card:#1A1A2E; --text:#F0F0F0;
   --safe-bottom:env(safe-area-inset-bottom,0px);
+  --scene-bg:radial-gradient(ellipse at 30% 20%,#1a0533 0%,#0D0D0D 65%);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:var(--text);font-family:'Inter',sans-serif;touch-action:manipulation;}
 
 /* STARS */
-#stars{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 30% 20%,#1a0533 0%,#0D0D0D 65%);}
+#stars{position:fixed;inset:0;z-index:0;background:var(--scene-bg);transition:background 0.8s ease;}
 .star{position:absolute;border-radius:50%;background:white;animation:twinkle 3s infinite alternate;}
 @keyframes twinkle{from{opacity:.15}to{opacity:.9}}
 
@@ -31,6 +34,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:va
 .screen.active{display:flex;}
 .screen.fade-in{animation:fadeIn .3s ease;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.screen.slide-in{animation:slideIn .3s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
 
 /* TITLE SCREEN */
 #title-screen{justify-content:flex-start;padding-top:40px;text-align:center;}
@@ -74,13 +79,15 @@ h1.game-title{font-family:'Orbitron',sans-serif;font-size:2.8rem;font-weight:900
 .dialogue-box{background:var(--card);border-left:3px solid var(--orange);border-radius:0 14px 14px 0;padding:14px 16px;margin:0 16px 18px;text-align:left;line-height:1.65;font-size:.92rem;}
 .speaker{font-weight:800;color:var(--orange);font-size:.7rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
 .choices-label{font-size:.68rem;color:var(--teal);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:10px;}
-.choice-btn{display:flex;align-items:flex-start;gap:10px;width:calc(100% - 32px);margin:0 16px 10px;padding:16px 14px;border-radius:14px;border:2px solid rgba(255,255,255,.07);background:var(--card);color:var(--text);font-family:'Inter',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;text-align:left;line-height:1.45;transition:border-color .15s,background .15s,transform .1s;}
+.choice-btn{display:flex;align-items:flex-start;gap:10px;width:calc(100% - 32px);margin:0 16px 10px;padding:16px 14px;border-radius:14px;border:2px solid rgba(255,255,255,.07);background:var(--card);color:var(--text);font-family:'Inter',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;text-align:left;line-height:1.45;transition:border-color .15s,background .15s,transform .15s;}
 .choice-btn:active{border-color:var(--teal);background:rgba(0,201,177,.12);transform:scale(.98);}
+.choice-btn.swiping{border-color:var(--teal);background:rgba(0,201,177,.18);}
 .choice-emoji{font-size:1.3rem;flex-shrink:0;margin-top:1px;}
+.swipe-hint{font-size:.62rem;color:rgba(255,255,255,.2);text-align:center;margin:-4px 16px 12px;letter-spacing:1px;}
 .choices-spacer{height:20px;}
 
 /* FEEDBACK OVERLAY */
-#feedback{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:32px 28px;background:rgba(0,0,0,.9);backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity .25s;}
+#feedback{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:32px 28px;background:rgba(0,0,0,.92);backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity .25s;}
 #feedback.show{opacity:1;pointer-events:all;}
 .fb-emoji{font-size:4.5rem;animation:popIn .35s ease;}
 .fb-title{font-family:'Orbitron',sans-serif;font-size:1.25rem;font-weight:700;text-align:center;line-height:1.3;}
@@ -88,7 +95,6 @@ h1.game-title{font-family:'Orbitron',sans-serif;font-size:2.8rem;font-weight:900
 .feedback-positive .fb-title{color:var(--mint);}
 .feedback-negative .fb-title{color:var(--coral);}
 .fb-tap-hint{font-size:.7rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:2px;margin-top:4px;}
-/* Countdown bar */
 .fb-timer-wrap{width:180px;height:3px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;}
 .fb-timer-bar{height:100%;border-radius:3px;background:var(--teal);width:100%;transition:width linear;}
 
@@ -112,11 +118,12 @@ h1.game-title{font-family:'Orbitron',sans-serif;font-size:2.8rem;font-weight:900
 /* VIBE HISTORY */
 .vibe-history{width:calc(100% - 32px);max-width:360px;background:var(--card);border-radius:16px;padding:14px 16px;margin:0 auto 20px;text-align:left;}
 .vh-label{font-size:.68rem;color:var(--teal);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:10px;}
-.vh-bars{display:flex;align-items:flex-end;gap:4px;height:48px;}
+.vh-bars{display:flex;align-items:flex-end;gap:3px;height:48px;}
 .vh-bar{flex:1;border-radius:4px 4px 0 0;background:var(--teal);min-height:4px;transition:height .5s ease;position:relative;}
 .vh-bar.neg{background:var(--coral);}
-.vh-scene-nums{display:flex;gap:4px;margin-top:4px;}
-.vh-num{flex:1;text-align:center;font-size:.6rem;color:rgba(255,255,255,.3);}
+.vh-bar.start{background:rgba(255,255,255,.2);}
+.vh-scene-nums{display:flex;gap:3px;margin-top:4px;}
+.vh-num{flex:1;text-align:center;font-size:.58rem;color:rgba(255,255,255,.3);}
 
 /* ACHIEVEMENT */
 .achievement-banner{background:linear-gradient(135deg,rgba(155,93,229,.3),rgba(0,201,177,.3));border:1px solid var(--purple);border-radius:14px;padding:12px 16px;margin:0 16px 16px;display:flex;align-items:center;gap:12px;}
@@ -128,7 +135,19 @@ h1.game-title{font-family:'Orbitron',sans-serif;font-size:2.8rem;font-weight:900
 .crisis-note strong{color:var(--teal);}
 
 /* SOUND BTN */
-#sound-btn{position:fixed;bottom:calc(16px + var(--safe-bottom));right:16px;z-index:60;width:40px;height:40px;border-radius:50%;background:rgba(26,26,46,.9);border:1px solid rgba(255,255,255,.1);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+#sound-btn{position:fixed;bottom:calc(16px + var(--safe-bottom));right:16px;z-index:60;width:44px;height:44px;border-radius:50%;background:rgba(26,26,46,.9);border:1px solid rgba(255,255,255,.15);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);transition:background .2s;}
+#sound-btn:active{background:rgba(0,201,177,.2);}
+
+/* PWA INSTALL BANNER */
+#install-banner{position:fixed;bottom:calc(68px + var(--safe-bottom));left:16px;right:16px;z-index:55;background:linear-gradient(135deg,rgba(26,26,46,.97),rgba(13,13,13,.97));border:1px solid rgba(244,124,32,.4);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(10px);transform:translateY(120px);opacity:0;transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .3s;pointer-events:none;}
+#install-banner.show{transform:translateY(0);opacity:1;pointer-events:all;}
+.ib-icon{font-size:1.8rem;flex-shrink:0;}
+.ib-text{flex:1;}
+.ib-text strong{font-size:.85rem;font-weight:800;color:var(--yellow);display:block;margin-bottom:2px;}
+.ib-text span{font-size:.72rem;color:rgba(255,255,255,.5);}
+.ib-actions{display:flex;flex-direction:column;gap:6px;flex-shrink:0;}
+.ib-btn-yes{padding:8px 14px;border-radius:50px;border:none;background:linear-gradient(135deg,var(--orange),var(--yellow));color:var(--dark);font-weight:800;font-size:.72rem;cursor:pointer;white-space:nowrap;}
+.ib-btn-no{padding:6px 14px;border-radius:50px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.4);font-size:.68rem;cursor:pointer;white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -143,7 +162,7 @@ h1.game-title{font-family:'Orbitron',sans-serif;font-size:2.8rem;font-weight:900
   <div class="scene-pill" id="scene-pill">1/8</div>
 </div>
 
-<!-- FEEDBACK -->
+<!-- FEEDBACK OVERLAY -->
 <div id="feedback">
   <div class="fb-emoji" id="fb-emoji"></div>
   <div class="fb-title" id="fb-title"></div>
@@ -153,7 +172,20 @@ h1.game-title{font-family:'Orbitron',sans-serif;font-size:2.8rem;font-weight:900
 </div>
 
 <!-- SOUND BUTTON -->
-<button id="sound-btn" onclick="toggleSound()" title="Toggle Sound">🔊</button>
+<button id="sound-btn" onclick="toggleSound()" title="Toggle Sound" aria-label="Toggle Sound">🔊</button>
+
+<!-- PWA INSTALL BANNER -->
+<div id="install-banner">
+  <div class="ib-icon">📲</div>
+  <div class="ib-text">
+    <strong>Add to Home Screen</strong>
+    <span>Play offline, anytime — no app store needed</span>
+  </div>
+  <div class="ib-actions">
+    <button class="ib-btn-yes" onclick="installApp()">Install</button>
+    <button class="ib-btn-no" onclick="dismissInstall()">Not now</button>
+  </div>
+</div>
 
 <!-- ══ TITLE SCREEN ══ -->
 <div class="screen active" id="title-screen">
@@ -172,7 +204,8 @@ h1.game-title{font-family:'Orbitron',sans-serif;font-size:2.8rem;font-weight:900
   <div class="name-wrap">
     <span class="name-label">What they call you?</span>
     <input class="name-input" id="player-name" type="text" maxlength="20"
-           placeholder="Enter your name..." autocomplete="off" autocorrect="off" spellcheck="false"/>
+           placeholder="Enter your name..." autocomplete="off" autocorrect="off" spellcheck="false"
+           onkeydown="if(event.key==='Enter'){event.target.blur();startGame();}"/>
   </div>
   <button class="btn-primary" onclick="startGame()">▶ START THE GAME</button>
   <button class="btn-secondary" onclick="showTips()" style="margin-top:0">💡 Real Talk Tips</button>
@@ -190,6 +223,7 @@ h1.game-title{font-family:'Orbitron',sans-serif;font-size:2.8rem;font-weight:900
   </div>
   <div class="choices-label">What you gonna do?</div>
   <div id="choices"></div>
+  <div class="swipe-hint">← swipe right on a choice to pick it →</div>
   <div class="choices-spacer"></div>
 </div>
 
@@ -259,13 +293,47 @@ h1.game-title{font-family:'Orbitron',sans-serif;font-size:2.8rem;font-weight:900
   <button class="btn-secondary" style="margin-top:12px" onclick="showTips()">💡 Real Talk Tips</button>
   <p class="crisis-note">
     If you're going through something real, don't lock that in.<br>
-    Text <strong>HOME to 741741</strong> — Crisis Text Line, free & confidential 24/7.<br>
-    Or call/text <strong>988</strong> — Suicide & Crisis Lifeline.
+    Text <strong>HOME to 741741</strong> — Crisis Text Line, free &amp; confidential 24/7.<br>
+    Or call/text <strong>988</strong> — Suicide &amp; Crisis Lifeline.
   </p>
   <div style="height:30px"></div>
 </div>
 
 <script>
+// ── SERVICE WORKER ─────────────────────────────────────
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+
+// ── PWA INSTALL PROMPT ─────────────────────────────────
+let deferredInstall=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  deferredInstall=e;
+  setTimeout(showInstallBanner, 4000);
+});
+window.addEventListener('appinstalled',()=>{ deferredInstall=null; hideInstallBanner(); });
+
+function showInstallBanner(){
+  if(!deferredInstall) return;
+  document.getElementById('install-banner').classList.add('show');
+}
+function hideInstallBanner(){
+  document.getElementById('install-banner').classList.remove('show');
+}
+function installApp(){
+  if(!deferredInstall) return;
+  hideInstallBanner();
+  deferredInstall.prompt();
+  deferredInstall.userChoice.then(()=>{ deferredInstall=null; });
+}
+function dismissInstall(){
+  hideInstallBanner();
+  deferredInstall=null;
+}
+
 // ── STARS ──────────────────────────────────────────────
 (function(){
   const c=document.getElementById('stars');
@@ -278,6 +346,30 @@ h1.game-title{font-family:'Orbitron',sans-serif;font-size:2.8rem;font-weight:900
   }
 })();
 
+// ── SCENE BACKGROUNDS ──────────────────────────────────
+const sceneBgs = [
+  'radial-gradient(ellipse at 30% 20%,#2d1a00 0%,#0D0D0D 60%)',   // 1 Hallway — amber
+  'radial-gradient(ellipse at 60% 30%,#001530 0%,#0D0D0D 60%)',   // 2 Lunch Table — blue
+  'radial-gradient(ellipse at 20% 40%,#001a18 0%,#0D0D0D 60%)',   // 3 Classroom — teal
+  'radial-gradient(ellipse at 50% 30%,#2d0a00 0%,#0D0D0D 60%)',   // 4 The Block — red
+  'radial-gradient(ellipse at 70% 20%,#1a0033 0%,#0D0D0D 60%)',   // 5 Bedroom — deep purple
+  'radial-gradient(ellipse at 30% 60%,#002d1a 0%,#0D0D0D 60%)',   // 6 Counselor — mint
+  'radial-gradient(ellipse at 50% 30%,#2d2200 0%,#0D0D0D 60%)',   // 7 Cafeteria — gold
+  'radial-gradient(ellipse at 50% 50%,#2d0033 0%,#0D0D0D 60%)',   // 8 Mirror — violet
+];
+function setSceneBg(idx){
+  if(idx>=0 && idx<sceneBgs.length){
+    document.getElementById('stars').style.background=sceneBgs[idx];
+  } else {
+    document.getElementById('stars').style.background='radial-gradient(ellipse at 30% 20%,#1a0533 0%,#0D0D0D 65%)';
+  }
+}
+
+// ── HAPTICS ────────────────────────────────────────────
+function haptic(pattern=[40]){
+  try{ if(navigator.vibrate) navigator.vibrate(pattern); }catch(e){}
+}
+
 // ── AUDIO ──────────────────────────────────────────────
 let audioCtx=null, soundOn=true;
 function getAudio(){
@@ -288,8 +380,8 @@ function playTone(freq,type,dur,vol=.18,delay=0){
   if(!soundOn) return;
   try{
     const ctx=getAudio();
-    const o=ctx.createOscillator(),g=ctx.createGain();
-    o.connect(g);g.connect(ctx.destination);
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
     o.type=type; o.frequency.value=freq;
     g.gain.setValueAtTime(vol,ctx.currentTime+delay);
     g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+delay+dur);
@@ -297,10 +389,25 @@ function playTone(freq,type,dur,vol=.18,delay=0){
     o.stop(ctx.currentTime+delay+dur);
   }catch(e){}
 }
-function soundChoice(){playTone(440,'sine',.08,.15);setTimeout(()=>playTone(550,'sine',.08,.12),60);}
-function soundPositive(){[0,.07,.14].forEach((d,i)=>playTone([523,659,784][i],'sine',.18,.16,d));}
-function soundNegative(){playTone(220,'sawtooth',.25,.1);setTimeout(()=>playTone(180,'sawtooth',.2,.08),120);}
-function soundStart(){[0,.1,.2].forEach((d,i)=>playTone([330,440,550][ i],'sine',.2,.14,d));}
+function soundChoice(){ playTone(440,'sine',.08,.15); setTimeout(()=>playTone(550,'sine',.08,.12),60); }
+function soundPositive(){ [0,.07,.14].forEach((d,i)=>playTone([523,659,784][i],'sine',.18,.16,d)); }
+function soundNegative(){ playTone(220,'sawtooth',.25,.1); setTimeout(()=>playTone(180,'sawtooth',.2,.08),120); }
+function soundStart(){ [0,.1,.2].forEach((d,i)=>playTone([330,440,550][i],'sine',.2,.14,d)); }
+function soundWhoosh(){
+  if(!soundOn) return;
+  try{
+    const ctx=getAudio();
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type='sine';
+    o.frequency.setValueAtTime(700,ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(180,ctx.currentTime+.22);
+    g.gain.setValueAtTime(.09,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.22);
+    o.start(ctx.currentTime);
+    o.stop(ctx.currentTime+.25);
+  }catch(e){}
+}
 function toggleSound(){
   soundOn=!soundOn;
   document.getElementById('sound-btn').textContent=soundOn?'🔊':'🔇';
@@ -379,7 +486,7 @@ const scenes=[
 
 // ── NAVIGATION ─────────────────────────────────────────
 function showScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active','fade-in','slide-in'));
   const el=document.getElementById(id);
   el.classList.add('active','fade-in');
   el.scrollTop=0;
@@ -388,21 +495,26 @@ function showScreen(id){
 
 function showTips(){
   document.getElementById('hud').classList.remove('visible');
+  setSceneBg(-1);
   showScreen('tips-screen');
 }
 
 function startGame(){
-  // Resume audio context on user gesture
   try{ getAudio().resume(); }catch(e){}
   playerName=(document.getElementById('player-name').value.trim())||'You';
   vibe=50; sceneIndex=0; vibeHistory=[];
   soundStart();
+  haptic([30,20,30]);
   document.getElementById('hud').classList.add('visible');
   showScreen('game-screen');
   loadScene(0);
 }
 
-function restartGame(){ showScreen('title-screen'); }
+function restartGame(){
+  document.getElementById('hud').classList.remove('visible');
+  setSceneBg(-1);
+  showScreen('title-screen');
+}
 
 // ── HUD ────────────────────────────────────────────────
 function updateHUD(){
@@ -412,15 +524,204 @@ function updateHUD(){
   document.getElementById('scene-pill').textContent=`${sceneIndex+1}/8`;
 }
 
+// ── SWIPE GESTURE ON CHOICES ───────────────────────────
+function addSwipeToBtn(btn, choiceData){
+  let startX=0, startY=0;
+  btn.addEventListener('touchstart', e=>{
+    startX=e.touches[0].clientX;
+    startY=e.touches[0].clientY;
+  },{passive:true});
+  btn.addEventListener('touchmove', e=>{
+    const dx=e.touches[0].clientX-startX;
+    if(Math.abs(dx)>20) btn.classList.add('swiping');
+  },{passive:true});
+  btn.addEventListener('touchend', e=>{
+    const dx=e.changedTouches[0].clientX-startX;
+    const dy=e.changedTouches[0].clientY-startY;
+    btn.classList.remove('swiping');
+    // Swipe right (dx>60) and mostly horizontal (dx > |dy|)
+    if(dx>60 && Math.abs(dx)>Math.abs(dy)){
+      e.preventDefault();
+      if(!btn.disabled){ soundChoice(); makeChoice(choiceData); }
+    }
+  });
+}
+
 // ── LOAD SCENE ─────────────────────────────────────────
 function loadScene(idx){
   const s=scenes[idx];
+  setSceneBg(idx);
+  soundWhoosh();
+
+  // Personalize text
+  const pn=playerName==='You'?'You':playerName;
   document.getElementById('scene-location').textContent=s.location;
   document.getElementById('scene-title').textContent=s.title;
   document.getElementById('scene-art').textContent=s.art;
   document.getElementById('scene-speaker').textContent=s.speaker;
-  // Personalize text with player name
-  document.getElementById('scene-text').textContent=
-    s.text.replace(/\bYou\b/g, playerName==='You'?'You':playerName);
+  document.getElementById('scene-text').textContent=s.text.replace(/\bYou\b/g,pn);
 
-  const wrap=document.getElementB
+  const wrap=document.getElementById('choices');
+  wrap.innerHTML='';
+  s.choices.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.className='choice-btn';
+    btn.innerHTML=`<span class="choice-emoji">${c.emoji}</span><span>${c.text}</span>`;
+    btn.addEventListener('click',()=>{ haptic([30]); soundChoice(); makeChoice(c); });
+    addSwipeToBtn(btn, c);
+    wrap.appendChild(btn);
+  });
+
+  document.getElementById('game-screen').scrollTop=0;
+  updateHUD();
+}
+
+// ── MAKE CHOICE ────────────────────────────────────────
+function makeChoice(choice){
+  // Disable all choices immediately
+  document.querySelectorAll('.choice-btn').forEach(b=>{ b.disabled=true; b.style.opacity='.5'; });
+
+  vibe=Math.max(0,Math.min(100,vibe+choice.delta));
+  vibeHistory.push({scene:sceneIndex+1, vibe, delta:choice.delta});
+  updateHUD();
+
+  // Haptic feedback: double pulse positive, single low negative
+  if(choice.delta>0){ haptic([40,30,80]); soundPositive(); }
+  else { haptic([120]); soundNegative(); }
+
+  // Show feedback overlay
+  const fb=document.getElementById('feedback');
+  fb.className=`show feedback-${choice.fb.type==='pos'?'positive':'negative'}`;
+  document.getElementById('fb-emoji').textContent=choice.fb.emoji;
+  document.getElementById('fb-title').textContent=choice.fb.title;
+  document.getElementById('fb-sub').textContent=choice.fb.sub;
+
+  // Reset countdown bar
+  const bar=document.getElementById('fb-timer');
+  bar.style.transition='none';
+  bar.style.width='100%';
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      bar.style.transition='width 3s linear';
+      bar.style.width='0%';
+    });
+  });
+
+  // Advance function (once only)
+  const advance=()=>{
+    fb.className=''; // hide
+    clearTimeout(timerTO);
+    sceneIndex++;
+    if(sceneIndex>=scenes.length) showEndScreen();
+    else loadScene(sceneIndex);
+  };
+
+  // Remove any stale listener, add fresh one with {once:true}
+  fb.addEventListener('click', advance, {once:true});
+  timerTO=setTimeout(()=>{
+    fb.removeEventListener('click', advance);
+    advance();
+  }, 3000);
+}
+
+// ── END SCREEN ─────────────────────────────────────────
+function showEndScreen(){
+  document.getElementById('hud').classList.remove('visible');
+  setSceneBg(-1);
+
+  const v=Math.max(0,Math.min(100,vibe));
+
+  // Best score
+  const bestKey='lockin_best';
+  let prev=0;
+  try{ prev=parseInt(localStorage.getItem(bestKey)||'0'); }catch(e){}
+  const isNew=v>prev;
+  try{ if(isNew) localStorage.setItem(bestKey,v); }catch(e){}
+
+  let badge,title,msg;
+  if(v>=85){
+    badge='👑'; title='MAIN CHARACTER';
+    msg=`${playerName==='You'?'You':playerName} played the whole game choosing YOU. Handled drama with class, set boundaries like a boss, and refused to let toxic energy live rent free. That's not just a game score — that's a real life skill set.`;
+  } else if(v>=65){
+    badge='🔥'; title='LOCKED IN';
+    msg='You made mostly power moves. A few slips, but you bounced back — which is exactly what real resilience looks like. Keep building.';
+  } else if(v>=40){
+    badge='🌱'; title='GROWING';
+    msg="Some tough calls, some missed ones. But you finished and that matters. Real growth is slow and bumpy. The fact you're thinking about this puts you ahead.";
+  } else {
+    badge='💛'; title='KEEP GOING';
+    msg="The situations got heavy. But guess what? That's real life sometimes. The point isn't perfection — it's awareness. Now you know what to watch for.";
+  }
+
+  document.getElementById('end-badge').textContent=badge;
+  document.getElementById('end-title').textContent=title;
+  document.getElementById('end-score').textContent=`Vibe Score: ${v} / 100`;
+  document.getElementById('end-best').textContent=isNew?'🏆 New best score!':`Best: ${prev} / 100`;
+  document.getElementById('end-msg').textContent=msg;
+
+  // Achievement
+  const achWrap=document.getElementById('achievement-wrap');
+  achWrap.innerHTML='';
+  const allPositive=vibeHistory.every(h=>h.delta>0);
+  if(allPositive){
+    achWrap.innerHTML=`<div class="achievement-banner"><div class="ach-icon">🏅</div><div class="ach-text"><h4>FLAWLESS VIBES</h4><p>You made every right call. That's elite mental strength.</p></div></div>`;
+  } else if(v>=85){
+    achWrap.innerHTML=`<div class="achievement-banner"><div class="ach-icon">🌟</div><div class="ach-text"><h4>REAL ONE CERTIFIED</h4><p>Top tier score. You locked in and stayed locked in.</p></div></div>`;
+  }
+
+  buildVibeChart();
+  showScreen('end-screen');
+
+  // Victory sound + haptic
+  if(v>=65){
+    [0,.1,.2,.3].forEach((d,i)=>playTone([440,550,660,880][i],'sine',.25,.14,d));
+    haptic([50,30,50,30,100]);
+  }
+}
+
+// ── VIBE CHART (with start baseline) ──────────────────
+function buildVibeChart(){
+  const barsEl=document.getElementById('vh-bars');
+  const numsEl=document.getElementById('vh-nums');
+  barsEl.innerHTML=''; numsEl.innerHTML='';
+
+  // Prepend starting baseline at 50
+  const chartData=[{scene:'S', vibe:50, delta:1, isStart:true}, ...vibeHistory];
+
+  chartData.forEach(h=>{
+    const bar=document.createElement('div');
+    const cls=h.isStart?'vh-bar start':(h.delta<0?'vh-bar neg':'vh-bar');
+    bar.className=cls;
+    bar.style.height='0px';
+    barsEl.appendChild(bar);
+    setTimeout(()=>{ bar.style.height=`${(h.vibe/100)*48}px`; }, 150);
+
+    const num=document.createElement('div');
+    num.className='vh-num';
+    num.textContent=h.scene;
+    numsEl.appendChild(num);
+  });
+}
+
+// ── SHARE ──────────────────────────────────────────────
+function shareScore(){
+  const v=Math.max(0,Math.min(100,vibe));
+  const badge=v>=85?'👑':v>=65?'🔥':v>=40?'🌱':'💛';
+  const name=playerName==='You'?'I':playerName;
+  const shareText=`${badge} ${name} scored ${v}/100 on LOCK IN — the mental health game for real ones. Can you beat me?\n\nhttps://cryptofedge.github.io/lock-in-game/`;
+  haptic([40]);
+  if(navigator.share){
+    navigator.share({
+      title:'LOCK IN — Mental Health Game',
+      text:shareText,
+      url:'https://cryptofedge.github.io/lock-in-game/'
+    }).catch(()=>{});
+  } else {
+    navigator.clipboard.writeText(shareText)
+      .then(()=>alert('Score copied to clipboard! Paste it anywhere 🔥'))
+      .catch(()=>alert(`Share this:\n\n${shareText}`));
+  }
+}
+</script>
+</body>
+</html>
