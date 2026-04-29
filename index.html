@@ -364,7 +364,7 @@ h1.game-title{
       </div>
       <div class="og-bubble og-side" style="animation:fadeIn .6s .2s both">
         <div class="og-name">OG Ray</div>
-        Aye youngin, pull up. I been on these blocks 30 years — seen everything. I'm 'bout to put you in some real situations. How you respond tells me who you are. You ready?
+        Aye, pull up real quick. I been out here since before you was born — seen it all go left. I'ma put you in some real situations, no cap. How you move is how you think. Let's see what you workin' with.
       </div>
     </div>
   </div>
@@ -980,30 +980,30 @@ function countUp(el, label, target, dur=1400){
 
 // ── OG RAY CHARACTER ───────────────────────────────────
 var ogIntros = [
-  "Marcus runnin' his mouth about you. First test: what you do when your name in somebody else\'s mouth?",
-  "The group chat. That\'s where loyalty gets exposed. Keisha just put your business in the street.",
-  "Jordan trying to use you. Old trick. You gone let him play you, or you gone hold your ground?",
-  "I know this corner. Stood here myself at your age. This right here — this where futures get decided.",
-  "That phone got more power over y\'all than anything on these streets. Don\'t let a screen tell you who you are.",
-  "Mr. Brooks been at this school 20 years. Real one. When a real one extends their hand — what you do?",
-  "The people you eat with shape who you become. New energy in that cafeteria. Don\'t sleep on it.",
-  "Last one, youngin. Look yourself in the mirror. After everything this week — what do you actually believe about yourself?"
+  "Word to mother — somebody always gone be runnin\' they mouth. Question is, you gone let that clown live rent free in ya head? I watched dudes catch cases behind less. Check ya temperature before you move.",
+  "Group chats is where loyalty goes to die, deadass. Keisha just aired you out in front of everybody. How you move RIGHT NOW? That\'s what people remember out here.",
+  "Jordan been movin\' funny since jump. Cats like that always need something from you — your rep, your time, your loyalty. The play is simple. Don\'t be the one always giving to someone who never matches.",
+  "Yo, I know this exact corner. Stood right here at your age, on God. Lost two of my mans on this block making the wrong call. Pay attention to what this moment is really asking you.",
+  "The phone got more youngins caught up than the streets ever did, no cap. That highlight reel they\'re showing you? Everybody suffering behind closed doors. Don\'t let a screen tell you where you stand.",
+  "Mr. Brooks is solid — been holding it down for years. Real ones like him don\'t extend their hand to everybody. When they do, you either move on it or you let your ego play you. Simple.",
+  "I spent too many years eating at the wrong table, word is bond. The energy over there? That\'s different. Don\'t let fear keep you stuck somewhere you\'re comfortable but not growing.",
+  "This is it. Everything you did this week — every call, every move — it\'s living inside you now. Forget what anybody else think. What do YOU actually believe about yourself right now?"
 ];
 var ogPos = [
-  "That\'s the move. I see you.",
-  "Real talk — that took strength. Most can\'t do that.",
-  "See? THAT\'S growth right there.",
-  "You learning. Keep that energy. That\'s how you build.",
-  "Exactly. THAT\'S what I been talking about.",
-  "That\'s the version of you that wins."
+  "That\'s the move right there. On sight.",
+  "Word. You just dodged something you ain\'t even know was coming for you.",
+  "See that? That\'s you moving different. Take note of that feeling.",
+  "Real recognize real. You just showed me something.",
+  "No cap — most can\'t make that call under pressure. You did.",
+  "That right there keeps your name clean. That\'s how real rep gets built."
 ];
 var ogNeg = [
-  "Nah... I made that same mistake. Cost me years, youngin.",
-  "That\'s the trap. Easy to fall in, hard to get out.",
-  "I feel you — but that ain\'t the way. Trust me on that.",
-  "You gone learn. Just make sure it don\'t cost you too much.",
-  "That right there is how they get you. Remember this feeling.",
-  "Seen too many good ones go down that road. You better than that."
+  "Nah... I been down that exact road. It cost me more than I\'m gone tell you right now.",
+  "That\'s the one that gets you caught lacking. Seen it play out a hundred times, deadass.",
+  "I feel you — the move felt right in the moment. But lowkey you just handed them power over you.",
+  "Aight. Just know that decision leaves a mark. What you gone do with the lesson?",
+  "That\'s exactly what they want you to do. Now you know how the play works.",
+  "You gone learn. Just don\'t let it cost you what it cost me, on everything."
 ];
 
 function handlePhotoUpload(input) {
@@ -1056,10 +1056,10 @@ function buildOGEnd(score) {
   var wrap = document.getElementById('og-end-wrap');
   if (!wrap) return;
   var msg;
-  if (score >= 85) msg = "That\'s my youngin right there. You handled yourself with class every step of the way. That ain\'t luck — that\'s character. The block needs more like you.";
-  else if (score >= 65) msg = "You did solid, for real. A few slips but you kept it moving. That\'s real life — you don\'t always get it perfect. What matters is you got back up.";
-  else if (score >= 40) msg = "You learning, and learning costs sometimes. I ain\'t mad at you. Just know every bad decision leaves a mark — make sure the marks teach you something.";
-  else msg = "Look — I ain\'t gone lie to you. It was rough out there. But you finished. Most don\'t even start. Now you know what to watch for. Run it back and show me different.";
+  if (score >= 85) msg = "Aight. I\'m not gone front — you moved with your head the whole way through. Kept your energy right, didn\'t let nobody flip you. That\'s not something you born with. That\'s something you choose. Every. Single. Time. That\'s the difference between moving smart and moving sloppy.";
+  else if (score >= 65) msg = "You held it down for real. Had a couple moments where they almost got to you — but you caught yourself and kept it pushing. That\'s the actual work right there. Keep building on that, no cap.";
+  else if (score >= 40) msg = "You took some L\'s out here, I\'m not gone sugarcoat it. But you stayed in it — and that ain\'t nothing. Every bad move got a lesson in it if you paying attention. Question is what you gone do different next time.";
+  else msg = "It got rough, deadass. But you still here, still moving — most don\'t even start. Now you got the knowledge of what NOT to do. That\'s worth something real. Run it back and show me a different you.";
   wrap.innerHTML =
     '<div class="og-msg" style="align-items:flex-end;gap:9px;">' +
       '<div class="og-avatar-wrap"><span class="og-avatar-emoji">🧔🏿</span><div class="og-avatar-name">OG Ray</div></div>' +
