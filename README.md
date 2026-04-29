@@ -2,8 +2,6 @@
 
 > *A choice-based mental health game for urban youth. Built to build.*
 
-![FEDGE 2.O](FEDGE-2O-Logo.png)
-
 ## What Is This?
 
 **LOCK IN** is a browser-based, choice-driven mental health game designed for students navigating real life in urban school environments. Every scene puts you in a situation — drama, peer pressure, toxic people, social media spirals — and your choices determine your **Vibe Score**.
