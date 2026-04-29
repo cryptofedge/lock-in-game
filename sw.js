@@ -1,7 +1,7 @@
 // LOCK IN — Service Worker
 // FEDGE 2.O © 2026
 
-const CACHE_NAME = 'lockin-v2';
+const CACHE_NAME = 'lockin-v3';
 const ASSETS = [
   './',
   './index.html',
