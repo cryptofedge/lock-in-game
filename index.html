@@ -678,150 +678,155 @@ function soundWhoosh(){
   }catch(e){}
 }
 
-// ── NEW YORK BOOM BAP BEAT (93 BPM) ──
-// Classic NYC hip-hop: heavy 808 kick, crisp snare, swinging hats, walking bass
-function scheduleNYBar(ctx, barStart){
-  var bpm=93;
-  var s16=60/bpm/4; // 16th note duration
+// ── NY DRILL BEAT (140 BPM) — low volume, authentic drill feel ──
+var drillBar=0;
+function scheduleDrillBar(ctx, t0){
+  var bpm=140;
+  var s16=60/bpm/4;
+  var s32=s16/2;
 
-  // ── 808 KICK (boomy, NYC punchy) ── steps 0, 8, 10 out of 16
-  function nyKick(t, vol){
-    try{
-      var o=ctx.createOscillator(), g=ctx.createGain(),
-          dist=ctx.createWaveShaper();
-      // slight distortion curve for that punch
-      var curve=new Float32Array(256);
-      for(var i=0;i<256;i++){ var x=i*2/256-1; curve[i]=x*(Math.abs(x)+.2)/(x*x*.2+1); }
-      dist.curve=curve;
-      o.connect(dist); dist.connect(g); g.connect(ctx.destination);
-      o.type='sine';
-      o.frequency.setValueAtTime(200,t);
-      o.frequency.exponentialRampToValueAtTime(45,t+.22);
-      g.gain.setValueAtTime(vol||.55,t);
-      g.gain.exponentialRampToValueAtTime(.0001,t+.3);
-      o.start(t); o.stop(t+.35);
-    }catch(e){}
-  }
+  // Master volume multiplier — keeps everything subtle
+  var MV=0.28;
 
-  // ── SNARE (NYC crack — noise + tone layer) ──
-  function nySnare(t, vol){
-    try{
-      // Tone body
-      var o=ctx.createOscillator(),og=ctx.createGain();
-      o.connect(og); og.connect(ctx.destination);
-      o.type='triangle'; o.frequency.setValueAtTime(200,t);
-      o.frequency.exponentialRampToValueAtTime(100,t+.06);
-      og.gain.setValueAtTime(vol*.6||.25,t);
-      og.gain.exponentialRampToValueAtTime(.0001,t+.08);
-      o.start(t); o.stop(t+.1);
-    }catch(e){}
-    // Noise crack
-    playNoise(1800,.07,vol*.7||.12,t-ctx.currentTime);
-  }
-
-  // ── GHOST SNARE (quiet, off-beat texture) ──
-  function ghost(t){ playNoise(2200,.03,.025,t-ctx.currentTime); }
-
-  // ── CRISP HI-HAT with swing ──
-  function hat(t, vol){ playNoise(8000,.022,vol||.04,t-ctx.currentTime); }
-
-  // ── OPEN HI-HAT (NY signature) ──
-  function openHat(t){
-    try{
-      var buf=ctx.createBuffer(1,Math.floor(ctx.sampleRate*.18),ctx.sampleRate);
-      var d=buf.getChannelData(0);
-      for(var i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,1.5);
-      var src=ctx.createBufferSource(), f=ctx.createBiquadFilter(), g=ctx.createGain();
-      f.type='highpass'; f.frequency.value=6000;
-      src.buffer=buf; src.connect(f); f.connect(g); g.connect(ctx.destination);
-      g.gain.setValueAtTime(.055,t);
-      g.gain.exponentialRampToValueAtTime(.0001,t+.18);
-      src.start(t); src.stop(t+.2);
-    }catch(e){}
-  }
-
-  // ── WALKING BASS LINE (NY pentatonic, Eb blues scale) ──
-  // Notes: Eb2=77.8, Gb2=92.5, Ab2=103.8, Bb2=116.5, Db3=138.6
-  var bassLine=[78,93,104,78, 117,104,93,78, 78,93,138,117, 93,78,104,78];
-  function bass(t, freq, dur){
-    if(!freq) return;
+  // ── SLIDING 808 — the heartbeat of drill ──
+  function slide808(t, startHz, endHz, vol, dur){
     try{
       var o=ctx.createOscillator(), g=ctx.createGain();
-      var filt=ctx.createBiquadFilter();
-      filt.type='lowpass'; filt.frequency.value=400;
-      o.connect(filt); filt.connect(g); g.connect(ctx.destination);
-      o.type='sawtooth'; o.frequency.value=freq;
-      g.gain.setValueAtTime(.22,t);
-      g.gain.setValueAtTime(.18,t+dur*.6);
-      g.gain.exponentialRampToValueAtTime(.0001,t+dur*.9);
-      o.start(t); o.stop(t+dur);
+      var sub=ctx.createOscillator(), sg=ctx.createGain();
+      o.connect(g);   g.connect(ctx.destination);
+      sub.connect(sg); sg.connect(ctx.destination);
+      o.type='sine'; sub.type='sine';
+      o.frequency.setValueAtTime(startHz,t);
+      o.frequency.exponentialRampToValueAtTime(endHz,t+dur);
+      sub.frequency.setValueAtTime(startHz/2,t);
+      sub.frequency.exponentialRampToValueAtTime(endHz/2,t+dur);
+      g.gain.setValueAtTime(vol*MV,t);
+      g.gain.setValueAtTime(vol*MV*.65,t+dur*.35);
+      g.gain.exponentialRampToValueAtTime(.0001,t+dur+.04);
+      sg.gain.setValueAtTime(vol*MV*.4,t);
+      sg.gain.exponentialRampToValueAtTime(.0001,t+dur+.04);
+      o.start(t); o.stop(t+dur+.08);
+      sub.start(t); sub.stop(t+dur+.08);
     }catch(e){}
   }
 
-  // ── CHORD STAB (NY soul chop, sparse) ── plays on bar start only
-  function chordStab(t){
+  // ── DRILL KICK ──
+  function dKick(t, vol){
     try{
-      // Minor 7th stab: root + b3 + 5 + b7
-      [[311,370,415,494]].forEach(function(chord){
-        chord.forEach(function(f){
-          var o=ctx.createOscillator(),g=ctx.createGain();
-          o.connect(g); g.connect(ctx.destination);
-          o.type='square'; o.frequency.value=f;
-          g.gain.setValueAtTime(.022,t);
-          g.gain.exponentialRampToValueAtTime(.0001,t+.08);
-          o.start(t); o.stop(t+.1);
-        });
-      });
+      var o=ctx.createOscillator(), g=ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type='sine';
+      o.frequency.setValueAtTime(160,t);
+      o.frequency.exponentialRampToValueAtTime(38,t+.14);
+      g.gain.setValueAtTime(vol*MV,t);
+      g.gain.exponentialRampToValueAtTime(.0001,t+.18);
+      o.start(t); o.stop(t+.2);
     }catch(e){}
   }
 
-  // ─── NY BOOM BAP PATTERN (16 steps) ───────────────────────
-  //  Step:  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
-  //  Kick:  K        .        .        K     K           .
-  //  Snare:          .     S        .           .     S
-  //  Hat:   h  h  h  h  h  h  h  O  h  h  h  h  h  h  h  h
-  //  Ghost:             g        g                 g
-
-  // KICKS
-  nyKick(barStart + 0*s16, .6);
-  nyKick(barStart + 8*s16, .55);
-  nyKick(barStart + 10*s16, .4);
-
-  // SNARES on beat 2 (step 4) and beat 4 (step 12)
-  nySnare(barStart + 4*s16, .42);
-  nySnare(barStart + 12*s16, .45);
-
-  // GHOST SNARES
-  ghost(barStart + 3*s16);
-  ghost(barStart + 6*s16);
-  ghost(barStart + 13*s16);
-
-  // HI-HATS — swung 8th notes (steps 0,2,4,6,8,10,12,14)
-  // with swing: odd hats pushed slightly late
-  var swing=s16*.12;
-  for(var i=0;i<16;i+=2){
-    if(i===14){ openHat(barStart+i*s16+swing); }
-    else { hat(barStart+i*s16+(i%4===2?swing:0), i===0||i===8?.055:.035); }
+  // ── DRILL SNARE — crisp, not booming ──
+  function dSnare(t, vol){
+    playNoise(2000,.07,vol*MV,t-ctx.currentTime);
+    try{
+      var o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type='triangle'; o.frequency.value=200;
+      g.gain.setValueAtTime(vol*MV*.45,t);
+      g.gain.exponentialRampToValueAtTime(.0001,t+.06);
+      o.start(t); o.stop(t+.08);
+    }catch(e){}
   }
 
-  // BASS LINE (16 notes)
-  for(var b=0;b<16;b++){
-    bass(barStart+b*s16, bassLine[b], s16*.88);
+  // ── TRAP HI-HAT — tight, quiet ──
+  function tHat(t,vol){ playNoise(9500,.016,vol*MV,t-ctx.currentTime); }
+
+  // ── HAT ROLL — rapid 32nds, fading ──
+  function hatRoll(t,count,vol){
+    for(var i=0;i<count;i++){
+      playNoise(10000,.012,(vol*(1-i/count*.5))*MV,(t-ctx.currentTime)+i*s32);
+    }
   }
 
-  // CHORD STAB — every 4 bars (tracked via beatBarCount)
-  beatBarCount=(beatBarCount||0)+1;
-  if(beatBarCount%4===1){ chordStab(barStart+2*s16); chordStab(barStart+10*s16); }
+  // ── OPEN HAT accent ──
+  function oHat(t){
+    try{
+      var buf=ctx.createBuffer(1,Math.floor(ctx.sampleRate*.09),ctx.sampleRate);
+      var d=buf.getChannelData(0);
+      for(var i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/d.length*7);
+      var src=ctx.createBufferSource(),f=ctx.createBiquadFilter(),g=ctx.createGain();
+      f.type='highpass'; f.frequency.value=7500;
+      src.buffer=buf; src.connect(f); f.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(.05*MV,t);
+      g.gain.exponentialRampToValueAtTime(.0001,t+.09);
+      src.start(t); src.stop(t+.1);
+    }catch(e){}
+  }
+
+  // ── DARK DRILL MELODY — detuned, eerie, very quiet ──
+  // C minor: Eb3=155.6, C3=130.8, Bb2=116.5, Db3=138.6, F3=174.6
+  var mel=[
+    [0,  155.6, s16*3.5],
+    [4,  130.8, s16*2  ],
+    [6,  116.5, s16*2.5],
+    [9,  138.6, s16*2  ],
+    [12, 155.6, s16*3  ],
+    [15, 174.6, s16*1.5],
+  ];
+  function drillNote(t,freq,dur){
+    try{
+      var o=ctx.createOscillator(),o2=ctx.createOscillator();
+      var lp=ctx.createBiquadFilter(),g=ctx.createGain();
+      lp.type='lowpass'; lp.frequency.value=1800; lp.Q.value=3;
+      o.connect(lp); o2.connect(lp); lp.connect(g); g.connect(ctx.destination);
+      o.type='square'; o2.type='sawtooth';
+      o.frequency.value=freq; o2.frequency.value=freq*1.004;
+      g.gain.setValueAtTime(.0001,t);
+      g.gain.linearRampToValueAtTime(.038*MV,t+.025);
+      g.gain.setValueAtTime(.034*MV,t+dur*.6);
+      g.gain.exponentialRampToValueAtTime(.0001,t+dur+.06);
+      o.start(t); o2.start(t); o.stop(t+dur+.08); o2.stop(t+dur+.08);
+    }catch(e){}
+  }
+
+  // ─── DRILL PATTERN ─────────────────────────────────────────
+  // 16 steps per bar at 140 BPM
+  // Kick:  0, 8, 11 (half-time + syncopation)
+  // Snare: beat 3 = step 8 (every other bar = half-time feel)
+  // Hats:  16th notes, rolls on 3, 7, 11 — open on 14
+  // 808:   slide starts on 0 and 8
+  // Melody: every other bar, very sparse
+
+  dKick(t0+0*s16,  1.0);
+  dKick(t0+8*s16,  .9);
+  dKick(t0+11*s16, .55);
+
+  if(drillBar%2===1){ dSnare(t0+8*s16, .85); }
+
+  for(var i=0;i<16;i++){
+    if(i===3||i===7||i===11){ hatRoll(t0+i*s16, 5, .18); }
+    else if(i===14)          { oHat(t0+i*s16); }
+    else                     { tHat(t0+i*s16, i%2===0?.16:.09); }
+  }
+
+  // 808 slides — long glide on 1, shorter accent on 3
+  slide808(t0+0*s16,  155.6, 77.8,  1.0, s16*7 );
+  slide808(t0+5*s16,  130.8, 103.8, .65, s16*2.5);
+  slide808(t0+8*s16,  138.6, 69.3,  .9,  s16*5 );
+  slide808(t0+13*s16, 116.5, 97.9,  .55, s16*2 );
+
+  if(drillBar%2===0){
+    mel.forEach(function(m){ drillNote(t0+m[0]*s16, m[1], m[2]); });
+  }
+
+  drillBar++;
 }
 
-var beatBarCount=0;
 function scheduleBeat(){
   if(!beatOn||!soundOn) return;
   var ctx=getAudio();
-  var bpm=93;
-  var barLen=60/bpm*4; // 1 bar in seconds
+  var barLen=60/140*4;
   var now=ctx.currentTime+.03;
-  scheduleNYBar(ctx, now);
+  scheduleDrillBar(ctx, now);
   beatTimeout=setTimeout(scheduleBeat,(barLen*1000)*.98);
 }
 function startBeat(){
