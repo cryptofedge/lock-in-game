@@ -2,7 +2,7 @@
 
 > *A choice-based mental health game for urban youth. Built to build.*
 
-![FEDGE 2.O](logo.png)
+![FEDGE 2.O](FEDGE-2O-Logo.png)
 
 ## What Is This?
 
@@ -53,7 +53,7 @@ This game teaches those skills through situations kids actually face.
 - **Colors**: Mood-lifting palette — orange, yellow, teal, coral, mint, purple
 - **Font**: Orbitron (futuristic) + Inter (clean readability)
 - **Lingo**: Gen Z / urban slang woven naturally into all dialogue
-- **Logo**: FEDGE 2.O rocket + orbital ring (transparent SVG)
+- **Logo**: FEDGE 2.O rocket + orbital ring (transparent background)
 
 ---
 
@@ -61,9 +61,10 @@ This game teaches those skills through situations kids actually face.
 
 ```
 lock-in-game/
-├── index.html     ← The full game (single file, zero dependencies)
-├── logo.svg       ← FEDGE 2.O logo, transparent background
-└── README.md      ← You're here
+├── index.html        ← The full game (single file, zero dependencies)
+├── logo.png          ← FEDGE 2.O logo, transparent background
+├── FEDGE-2O-Logo.png ← FEDGE 2.O brand logo
+└── README.md         ← You're here
 ```
 
 ---
@@ -81,3 +82,52 @@ This game is for education and empowerment. If you or someone you know is strugg
 ## 🚀 Built by FEDGE 2.O
 
 *Built to build mental strength and confidence in the next generation.*
+
+---
+
+## 📄 License
+
+© 2026 FEDGE 2.O. All rights reserved.
+
+---
+
+## License & Brand
+
+<img src="FEDGE-2O-Logo.png" alt="FEDGE 2.O Logo" width="120" height="120">
+
+### FEDGE 2.O | Powered by Rafael Fellito Rodriguez and Eclat Universe
+
+**© 2026 FEDGE 2.O. All rights reserved.**
+
+This project is part of the FEDGE 2.O ecosystem and is protected under full intellectual property rights reserved by Rafael Fellito Rodriguez and Eclat Universe.
+
+### License Details
+
+- **Type:** Proprietary - All Rights Reserved
+- **Owner:** Rafael Fellito Rodriguez and Eclat Universe
+- **Brand:** FEDGE 2.O
+- **Status:** Protected and Confidential
+
+### Key Rights
+
+✓ **All intellectual property retained**
+✓ **Reproduction prohibited without permission**
+✓ **Distribution rights reserved**
+✓ **Derivative works not permitted**
+✓ **Commercial use requires authorization**
+
+### Attribution
+
+When referencing this software, please include:
+- FEDGE 2.O
+- Rafael Fellito Rodriguez
+- Eclat Universe
+
+### Inquiries
+
+For licensing, partnerships, or usage permissions:
+Email: **cryptofedge@gmail.com**
+
+---
+
+**Learn more:** [Full License](https://github.com/cryptofedge/lock-in-game/blob/main/LICENSE)
