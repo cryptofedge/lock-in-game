@@ -2,7 +2,7 @@
 
 > *A choice-based mental health game for urban youth. Built to build.*
 
-![FEDGE 2.O](logo.svg)
+![FEDGE 2.O](logo.png)
 
 ## What Is This?
 
