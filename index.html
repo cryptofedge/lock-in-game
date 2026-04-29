@@ -411,8 +411,19 @@ h1.game-title{
 <script>
 // ── SERVICE WORKER ─────────────────────────────────────
 if('serviceWorker' in navigator){
+  // Nuke all old caches immediately
+  if('caches' in window){
+    caches.keys().then(keys=>keys.forEach(k=>{ if(k!=='lockin-v4') caches.delete(k); }));
+  }
   window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+    // ?v=4 forces browser to re-register even if sw.js URL looks the same
+    navigator.serviceWorker.register('./sw.js?v=4').then(reg=>{
+      reg.update();
+    }).catch(()=>{});
+    // Auto-reload when new SW takes control
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{
+      window.location.reload();
+    });
   });
 }
 
@@ -712,13 +723,4 @@ function showScreen(id){
   const el=document.getElementById(id);
   el.classList.add('active','fade-in');
   el.scrollTop=0;
-  setTimeout(()=>el.classList.remove('fade-in'),400);
-}
-function showTips(){ document.getElementById('hud').classList.remove('visible'); setSceneBg(-1); showScreen('tips-screen'); }
-function startGame(){
-  try{ getAudio().resume(); }catch(e){}
-  playerName=(document.getElementById('player-name').value.trim())||'You';
-  vibe=50; sceneIndex=0; vibeHistory=[];
-  soundStart(); haptic([30,20,60]);
-  document.getElementById('hud').classList.add('visible');
-  s
+  setTimeout(()=>el.classLis
