@@ -678,25 +678,151 @@ function soundWhoosh(){
   }catch(e){}
 }
 
-// ── Background beat (lo-fi hip hop, 88bpm) ──
+// ── NEW YORK BOOM BAP BEAT (93 BPM) ──
+// Classic NYC hip-hop: heavy 808 kick, crisp snare, swinging hats, walking bass
+function scheduleNYBar(ctx, barStart){
+  var bpm=93;
+  var s16=60/bpm/4; // 16th note duration
+
+  // ── 808 KICK (boomy, NYC punchy) ── steps 0, 8, 10 out of 16
+  function nyKick(t, vol){
+    try{
+      var o=ctx.createOscillator(), g=ctx.createGain(),
+          dist=ctx.createWaveShaper();
+      // slight distortion curve for that punch
+      var curve=new Float32Array(256);
+      for(var i=0;i<256;i++){ var x=i*2/256-1; curve[i]=x*(Math.abs(x)+.2)/(x*x*.2+1); }
+      dist.curve=curve;
+      o.connect(dist); dist.connect(g); g.connect(ctx.destination);
+      o.type='sine';
+      o.frequency.setValueAtTime(200,t);
+      o.frequency.exponentialRampToValueAtTime(45,t+.22);
+      g.gain.setValueAtTime(vol||.55,t);
+      g.gain.exponentialRampToValueAtTime(.0001,t+.3);
+      o.start(t); o.stop(t+.35);
+    }catch(e){}
+  }
+
+  // ── SNARE (NYC crack — noise + tone layer) ──
+  function nySnare(t, vol){
+    try{
+      // Tone body
+      var o=ctx.createOscillator(),og=ctx.createGain();
+      o.connect(og); og.connect(ctx.destination);
+      o.type='triangle'; o.frequency.setValueAtTime(200,t);
+      o.frequency.exponentialRampToValueAtTime(100,t+.06);
+      og.gain.setValueAtTime(vol*.6||.25,t);
+      og.gain.exponentialRampToValueAtTime(.0001,t+.08);
+      o.start(t); o.stop(t+.1);
+    }catch(e){}
+    // Noise crack
+    playNoise(1800,.07,vol*.7||.12,t-ctx.currentTime);
+  }
+
+  // ── GHOST SNARE (quiet, off-beat texture) ──
+  function ghost(t){ playNoise(2200,.03,.025,t-ctx.currentTime); }
+
+  // ── CRISP HI-HAT with swing ──
+  function hat(t, vol){ playNoise(8000,.022,vol||.04,t-ctx.currentTime); }
+
+  // ── OPEN HI-HAT (NY signature) ──
+  function openHat(t){
+    try{
+      var buf=ctx.createBuffer(1,Math.floor(ctx.sampleRate*.18),ctx.sampleRate);
+      var d=buf.getChannelData(0);
+      for(var i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,1.5);
+      var src=ctx.createBufferSource(), f=ctx.createBiquadFilter(), g=ctx.createGain();
+      f.type='highpass'; f.frequency.value=6000;
+      src.buffer=buf; src.connect(f); f.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(.055,t);
+      g.gain.exponentialRampToValueAtTime(.0001,t+.18);
+      src.start(t); src.stop(t+.2);
+    }catch(e){}
+  }
+
+  // ── WALKING BASS LINE (NY pentatonic, Eb blues scale) ──
+  // Notes: Eb2=77.8, Gb2=92.5, Ab2=103.8, Bb2=116.5, Db3=138.6
+  var bassLine=[78,93,104,78, 117,104,93,78, 78,93,138,117, 93,78,104,78];
+  function bass(t, freq, dur){
+    if(!freq) return;
+    try{
+      var o=ctx.createOscillator(), g=ctx.createGain();
+      var filt=ctx.createBiquadFilter();
+      filt.type='lowpass'; filt.frequency.value=400;
+      o.connect(filt); filt.connect(g); g.connect(ctx.destination);
+      o.type='sawtooth'; o.frequency.value=freq;
+      g.gain.setValueAtTime(.22,t);
+      g.gain.setValueAtTime(.18,t+dur*.6);
+      g.gain.exponentialRampToValueAtTime(.0001,t+dur*.9);
+      o.start(t); o.stop(t+dur);
+    }catch(e){}
+  }
+
+  // ── CHORD STAB (NY soul chop, sparse) ── plays on bar start only
+  function chordStab(t){
+    try{
+      // Minor 7th stab: root + b3 + 5 + b7
+      [[311,370,415,494]].forEach(function(chord){
+        chord.forEach(function(f){
+          var o=ctx.createOscillator(),g=ctx.createGain();
+          o.connect(g); g.connect(ctx.destination);
+          o.type='square'; o.frequency.value=f;
+          g.gain.setValueAtTime(.022,t);
+          g.gain.exponentialRampToValueAtTime(.0001,t+.08);
+          o.start(t); o.stop(t+.1);
+        });
+      });
+    }catch(e){}
+  }
+
+  // ─── NY BOOM BAP PATTERN (16 steps) ───────────────────────
+  //  Step:  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
+  //  Kick:  K        .        .        K     K           .
+  //  Snare:          .     S        .           .     S
+  //  Hat:   h  h  h  h  h  h  h  O  h  h  h  h  h  h  h  h
+  //  Ghost:             g        g                 g
+
+  // KICKS
+  nyKick(barStart + 0*s16, .6);
+  nyKick(barStart + 8*s16, .55);
+  nyKick(barStart + 10*s16, .4);
+
+  // SNARES on beat 2 (step 4) and beat 4 (step 12)
+  nySnare(barStart + 4*s16, .42);
+  nySnare(barStart + 12*s16, .45);
+
+  // GHOST SNARES
+  ghost(barStart + 3*s16);
+  ghost(barStart + 6*s16);
+  ghost(barStart + 13*s16);
+
+  // HI-HATS — swung 8th notes (steps 0,2,4,6,8,10,12,14)
+  // with swing: odd hats pushed slightly late
+  var swing=s16*.12;
+  for(var i=0;i<16;i+=2){
+    if(i===14){ openHat(barStart+i*s16+swing); }
+    else { hat(barStart+i*s16+(i%4===2?swing:0), i===0||i===8?.055:.035); }
+  }
+
+  // BASS LINE (16 notes)
+  for(var b=0;b<16;b++){
+    bass(barStart+b*s16, bassLine[b], s16*.88);
+  }
+
+  // CHORD STAB — every 4 bars (tracked via beatBarCount)
+  beatBarCount=(beatBarCount||0)+1;
+  if(beatBarCount%4===1){ chordStab(barStart+2*s16); chordStab(barStart+10*s16); }
+}
+
+var beatBarCount=0;
 function scheduleBeat(){
   if(!beatOn||!soundOn) return;
-  const ctx=getAudio();
-  const step=60/88/2; // 8th note duration
-  const now=ctx.currentTime+.02;
-  // 1 bar = 8 eighth notes
-  // Kick: beat 1 (i=0) and beat 5 (i=4)
-  [0,4].forEach(function(i){ playKick(.18,now+i*step); });
-  // Snare (noise): beat 3 and 7
-  [2,6].forEach(function(i){ playNoise(1200,.05,.06,now+i*step); });
-  // Hi-hat: every 8th note, quieter on off-beats
-  for(var i=0;i<8;i++){
-    playNoise(6000,.025,i%2===0?.03:.015,now+i*step);
-  }
-  // Bass note on kick beats
-  playTone(82,'sine',.18,.07,now);
-  playTone(82,'sine',.18,.07,now+4*step);
-  beatTimeout=setTimeout(scheduleBeat,(step*8*1000)*.98);
+  var ctx=getAudio();
+  var bpm=93;
+  var barLen=60/bpm*4; // 1 bar in seconds
+  var now=ctx.currentTime+.03;
+  scheduleNYBar(ctx, now);
+  beatTimeout=setTimeout(scheduleBeat,(barLen*1000)*.98);
 }
 function startBeat(){
   if(beatOn) return;
