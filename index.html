@@ -23,6 +23,19 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:var(--text);font-family:'Inter',sans-serif;touch-action:manipulation;}
 
+
+/* ── STREAK ── */
+#streak-display{font-size:.72rem;font-weight:800;white-space:nowrap;letter-spacing:.5px;transition:all .3s;}
+.streak-fire{color:var(--orange);animation:streakPulse 1s ease-in-out infinite alternate;}
+.streak-locked{color:var(--purple);animation:streakPulse .6s ease-in-out infinite alternate;}
+@keyframes streakPulse{from{opacity:.7;transform:scale(.95)}to{opacity:1;transform:scale(1.08)}}
+.streak-banner{position:fixed;top:55px;left:50%;transform:translateX(-50%);z-index:200;
+  background:linear-gradient(135deg,rgba(244,124,32,.95),rgba(255,217,61,.95));
+  color:#0D0D0D;font-weight:900;font-size:.85rem;letter-spacing:1.5px;text-transform:uppercase;
+  padding:8px 22px;border-radius:50px;pointer-events:none;
+  animation:streakBannerIn .4s cubic-bezier(.34,1.56,.64,1) forwards;}
+@keyframes streakBannerIn{from{opacity:0;transform:translateX(-50%) scale(.7) translateY(-10px)}to{opacity:1;transform:translateX(-50%) scale(1) translateY(0)}}
+
 /* ── STARS ── */
 #stars{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 30% 20%,#1a0533 0%,#0D0D0D 65%);transition:background 0.9s ease;}
 .star{position:absolute;border-radius:50%;background:white;animation:twinkle 3s infinite alternate;}
@@ -297,6 +310,7 @@ h1.game-title{
   <div class="hud-label">✨ Vibe</div>
   <div class="meter-bar"><div class="meter-fill" id="meter-fill" style="width:50%"></div></div>
   <div class="meter-val" id="meter-val">50</div>
+  <div id="streak-display" style="display:none"></div>
   <div class="scene-pill" id="scene-pill">1/8</div>
 </div>
 
@@ -534,43 +548,172 @@ function setSceneBg(idx){
 function haptic(p=[40]){ try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){} }
 
 // ── AUDIO ──────────────────────────────────────────────
-let audioCtx=null, soundOn=true;
+let audioCtx=null, soundOn=true, beatOn=false, beatTimeout=null;
+
+// ── AudioContext: unlock on first gesture (iOS fix) ──
 function getAudio(){
   if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended') audioCtx.resume();
   return audioCtx;
 }
-function playTone(freq,type,dur,vol=.18,delay=0){
+function unlockAudio(){
+  getAudio();
+  document.removeEventListener('touchstart',unlockAudio);
+  document.removeEventListener('mousedown',unlockAudio);
+}
+document.addEventListener('touchstart',unlockAudio,{passive:true,once:true});
+document.addEventListener('mousedown',unlockAudio,{once:true});
+
+// ── Core tone engine ──
+function playTone(freq,type,dur,vol,delay){
+  vol=vol||.18; delay=delay||0;
   if(!soundOn) return;
   try{
     const ctx=getAudio();
     const o=ctx.createOscillator(),g=ctx.createGain();
     o.connect(g);g.connect(ctx.destination);
     o.type=type;o.frequency.value=freq;
-    g.gain.setValueAtTime(vol,ctx.currentTime+delay);
-    g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+delay+dur);
+    g.gain.setValueAtTime(Math.min(vol,1),ctx.currentTime+delay);
+    g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+delay+dur);
     o.start(ctx.currentTime+delay);
-    o.stop(ctx.currentTime+delay+dur);
+    o.stop(ctx.currentTime+delay+dur+.05);
   }catch(e){}
 }
-function soundChoice(){playTone(440,'sine',.08,.15);setTimeout(()=>playTone(550,'sine',.08,.12),60);}
-function soundPositive(){[0,.07,.14].forEach((d,i)=>playTone([523,659,784][i],'sine',.18,.16,d));}
-function soundNegative(){playTone(220,'sawtooth',.25,.1);setTimeout(()=>playTone(180,'sawtooth',.2,.08),120);}
-function soundStart(){[0,.1,.2].forEach((d,i)=>playTone([330,440,550][i],'sine',.2,.14,d));}
+
+// ── 808-style kick drum ──
+function playKick(vol,delay){
+  delay=delay||0;
+  if(!soundOn) return;
+  try{
+    const ctx=getAudio(),o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type='sine';
+    o.frequency.setValueAtTime(160,ctx.currentTime+delay);
+    o.frequency.exponentialRampToValueAtTime(40,ctx.currentTime+delay+.18);
+    g.gain.setValueAtTime(vol||.5,ctx.currentTime+delay);
+    g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+delay+.25);
+    o.start(ctx.currentTime+delay);
+    o.stop(ctx.currentTime+delay+.3);
+  }catch(e){}
+}
+
+// ── Noise burst (snare/hihat) ──
+function playNoise(hpFreq,dur,vol,delay){
+  delay=delay||0;
+  if(!soundOn) return;
+  try{
+    const ctx=getAudio();
+    const bufSize=Math.floor(ctx.sampleRate*dur);
+    const buf=ctx.createBuffer(1,bufSize,ctx.sampleRate);
+    const d=buf.getChannelData(0);
+    for(let i=0;i<bufSize;i++) d[i]=(Math.random()*2-1);
+    const src=ctx.createBufferSource();
+    src.buffer=buf;
+    const filt=ctx.createBiquadFilter();
+    filt.type='highpass';filt.frequency.value=hpFreq;
+    const g=ctx.createGain();
+    src.connect(filt);filt.connect(g);g.connect(ctx.destination);
+    g.gain.setValueAtTime(vol||.08,ctx.currentTime+delay);
+    g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+delay+dur);
+    src.start(ctx.currentTime+delay);
+    src.stop(ctx.currentTime+delay+dur+.05);
+  }catch(e){}
+}
+
+// ── SFX ──
+function soundChoice(){
+  playTone(700,'sine',.07,.1);
+  playTone(1050,'sine',.05,.06,.05);
+}
+function soundPositive(){
+  // Bass hit + ascending chord
+  playKick(.35);
+  [[0,523,.22,.18],[.08,659,.2,.16],[.16,784,.18,.15],[.24,1047,.16,.13]].forEach(function(a){
+    playTone(a[1],'sine',a[2],a[3],a[0]);
+  });
+}
+function soundNegative(){
+  if(!soundOn)return;
+  try{
+    const ctx=getAudio(),o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);o.type='sawtooth';
+    o.frequency.setValueAtTime(260,ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(65,ctx.currentTime+.35);
+    g.gain.setValueAtTime(.28,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.4);
+    o.start(ctx.currentTime);o.stop(ctx.currentTime+.45);
+  }catch(e){}
+  playNoise(400,.12,.15,.18);
+}
+function soundStart(){
+  // Bass drop + cinematic rise
+  playKick(.6);
+  playKick(.35,.25);
+  [0,.14,.26,.38].forEach(function(d,i){
+    playTone([220,330,440,660][i],'sine',.35,[.14,.16,.2,.28][i],d);
+  });
+}
+function soundStreak(){
+  // Ascending hype arpeggio
+  [0,.06,.12,.18,.24].forEach(function(d,i){
+    playTone([440,554,659,880,1047][i],'sine',.22,[.18,.2,.22,.24,.28][i],d);
+  });
+  playKick(.4,.05);
+}
+function soundStreakLost(){
+  playTone(330,'sawtooth',.12,.2);
+  playTone(247,'sawtooth',.15,.18,.1);
+  playTone(196,'sawtooth',.2,.15,.22);
+}
 function soundWhoosh(){
   if(!soundOn)return;
   try{
     const ctx=getAudio(),o=ctx.createOscillator(),g=ctx.createGain();
     o.connect(g);g.connect(ctx.destination);o.type='sine';
-    o.frequency.setValueAtTime(700,ctx.currentTime);
-    o.frequency.exponentialRampToValueAtTime(180,ctx.currentTime+.22);
-    g.gain.setValueAtTime(.09,ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.22);
+    o.frequency.setValueAtTime(800,ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(160,ctx.currentTime+.2);
+    g.gain.setValueAtTime(.1,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.22);
     o.start(ctx.currentTime);o.stop(ctx.currentTime+.25);
   }catch(e){}
 }
+
+// ── Background beat (lo-fi hip hop, 88bpm) ──
+function scheduleBeat(){
+  if(!beatOn||!soundOn) return;
+  const ctx=getAudio();
+  const step=60/88/2; // 8th note duration
+  const now=ctx.currentTime+.02;
+  // 1 bar = 8 eighth notes
+  // Kick: beat 1 (i=0) and beat 5 (i=4)
+  [0,4].forEach(function(i){ playKick(.18,now+i*step); });
+  // Snare (noise): beat 3 and 7
+  [2,6].forEach(function(i){ playNoise(1200,.05,.06,now+i*step); });
+  // Hi-hat: every 8th note, quieter on off-beats
+  for(var i=0;i<8;i++){
+    playNoise(6000,.025,i%2===0?.03:.015,now+i*step);
+  }
+  // Bass note on kick beats
+  playTone(82,'sine',.18,.07,now);
+  playTone(82,'sine',.18,.07,now+4*step);
+  beatTimeout=setTimeout(scheduleBeat,(step*8*1000)*.98);
+}
+function startBeat(){
+  if(beatOn) return;
+  beatOn=true;
+  scheduleBeat();
+}
+function stopBeat(){
+  beatOn=false;
+  if(beatTimeout) clearTimeout(beatTimeout);
+  beatTimeout=null;
+}
+
 function toggleSound(){
   soundOn=!soundOn;
   document.getElementById('sound-btn').textContent=soundOn?'🔊':'🔇';
+  if(soundOn && beatOn){ scheduleBeat(); }
+  if(!soundOn) stopBeat();
 }
 
 // ── RIPPLE EFFECT ──────────────────────────────────────
@@ -794,7 +937,7 @@ function buildOGEnd(score) {
 }
 
 // ── STATE ──────────────────────────────────────────────
-let vibe=50, sceneIndex=0, playerName='', playerPhoto=null, vibeHistory=[], timerTO=null;
+let vibe=50, sceneIndex=0, playerName='', playerPhoto=null, vibeHistory=[], timerTO=null, streak=0;
 
 // ── SCENES ─────────────────────────────────────────────
 const scenes=[
@@ -877,12 +1020,12 @@ function startGame(){
   try{ getAudio().resume(); }catch(e){}
   playerName=(document.getElementById('player-name').value.trim())||'You';
   vibe=50; sceneIndex=0; vibeHistory=[];
-  soundStart(); haptic([30,20,60]);
+  soundStart(); haptic([30,20,60]); setTimeout(startBeat, 1200);
   document.getElementById('hud').classList.add('visible');
   showScreen('game-screen');
   loadScene(0);
 }
-function restartGame(){ document.getElementById('hud').classList.remove('visible'); setSceneBg(-1); showScreen('title-screen'); }
+function restartGame(){ stopBeat(); streak=0; updateStreakDisplay(); document.getElementById('hud').classList.remove('visible'); setSceneBg(-1); showScreen('title-screen'); }
 
 // ── HUD ────────────────────────────────────────────────
 function updateHUD(flash){
@@ -941,16 +1084,59 @@ function loadScene(idx){
 }
 
 // ── MAKE CHOICE ────────────────────────────────────────
+
+// ── STREAK SYSTEM ──
+function updateStreakDisplay(){
+  var el=document.getElementById('streak-display');
+  if(!el) return;
+  if(streak>=5){
+    el.style.display='block';
+    el.innerHTML='<span class="streak-locked">💀 x2</span>';
+  } else if(streak>=3){
+    el.style.display='block';
+    el.innerHTML='<span class="streak-fire">🔥 x1.5</span>';
+  } else {
+    el.style.display='none';
+  }
+}
+function showStreakBanner(msg){
+  var b=document.createElement('div');
+  b.className='streak-banner';
+  b.textContent=msg;
+  document.body.appendChild(b);
+  setTimeout(function(){ b.style.opacity='0'; b.style.transition='opacity .4s'; setTimeout(function(){ b.remove(); },400); },1800);
+}
+function handleStreak(isPos){
+  if(isPos){
+    streak++;
+    if(streak===3){ soundStreak(); showStreakBanner('🔥 ON FIRE! x1.5'); }
+    else if(streak===5){ soundStreak(); soundStreak(); showStreakBanner('💀 LOCKED IN! x2'); }
+    else if(streak>5){ soundStreak(); }
+  } else {
+    if(streak>=3){ soundStreakLost(); showStreakBanner('💔 Streak gone...'); }
+    streak=0;
+  }
+  updateStreakDisplay();
+}
+function getStreakMultiplier(){
+  if(streak>=5) return 2;
+  if(streak>=3) return 1.5;
+  return 1;
+}
+
 function makeChoice(choice){
   document.querySelectorAll('.choice-btn').forEach(function(b){ b.disabled=true; b.style.opacity='.45'; });
   var prevVibe=vibe;
-  vibe=Math.max(0,Math.min(100,vibe+choice.delta));
+  var mult=getStreakMultiplier();
+  var adjustedDelta=choice.delta>0?Math.round(choice.delta*mult):choice.delta;
+  vibe=Math.max(0,Math.min(100,vibe+adjustedDelta));
   vibeHistory.push({scene:sceneIndex+1,vibe:vibe,delta:choice.delta});
   updateHUD(true);
   if(vibe>=90&&prevVibe<90) showToast('VIBES MAXED OUT','👑');
   else if(vibe>=75&&prevVibe<75) showToast("YOU'RE LOCKED IN",'🔥');
   else if(vibe<=25&&prevVibe>25) showToast('CHECK YOUR ENERGY','⚠️');
   setOGFeedback(choice.delta>0);
+  handleStreak(choice.delta>0);
   if(choice.delta>0){ haptic([40,30,80]); soundPositive(); spawnEmojis(['✨','🔥','💪','🚀','💛','🌟','👑']); }
   else { haptic([120]); soundNegative(); screenShake(); }
   var fb=document.getElementById('feedback');
@@ -974,6 +1160,7 @@ function makeChoice(choice){
 
 // ── END SCREEN ─────────────────────────────────────────
 function showEndScreen(){
+  stopBeat(); streak=0;
   document.getElementById('hud').classList.remove('visible');
   setSceneBg(-1);
   var v=Math.max(0,Math.min(100,vibe));
