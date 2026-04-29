@@ -209,6 +209,23 @@ h1.game-title{
 }
 .vibe-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+
+/* ── OG CHARACTER CHAT ── */
+.og-convo{padding:0 16px;margin-bottom:10px;}
+.og-msg{display:flex;align-items:flex-end;gap:9px;margin-bottom:8px;}
+.og-msg.player-msg{flex-direction:row-reverse;}
+.og-avatar-wrap{flex-shrink:0;text-align:center;width:44px;}
+.og-avatar-emoji{font-size:2rem;display:block;line-height:1;}
+.og-avatar-name{font-size:.52rem;color:rgba(255,255,255,.35);font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+.og-bubble{max-width:72%;border-radius:18px 18px 18px 4px;padding:10px 14px;font-size:.85rem;line-height:1.55;position:relative;}
+.og-msg.player-msg .og-bubble{border-radius:18px 18px 4px 18px;background:rgba(0,201,177,.15);border:1px solid rgba(0,201,177,.3);color:var(--text);}
+.og-bubble.og-side{background:rgba(26,26,46,.95);border:1px solid rgba(244,124,32,.25);color:var(--text);}
+.og-name{font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.og-side .og-name{color:var(--orange);}
+.og-msg.player-msg .og-name{color:var(--teal);text-align:right;}
+.fb-og{font-size:.82rem;color:rgba(255,255,255,.6);font-style:italic;margin-top:4px;padding:8px 14px;border-top:1px solid rgba(255,255,255,.08);text-align:center;max-width:300px;}
+.fb-og span{color:var(--orange);font-weight:700;font-style:normal;}
+
 /* ── TIPS SCREEN ── */
 #tips-screen{padding-top:36px;text-align:center;}
 .tips-header{font-family:'Orbitron',sans-serif;font-size:1.5rem;color:var(--teal);margin-bottom:4px;}
@@ -280,6 +297,7 @@ h1.game-title{
   <div class="fb-title" id="fb-title"></div>
   <div class="fb-sub" id="fb-sub"></div>
   <div class="fb-timer-wrap"><div class="fb-timer-bar" id="fb-timer"></div></div>
+  <div class="fb-og" id="fb-og"></div>
   <div class="fb-tap-hint">tap to continue</div>
 </div>
 
@@ -313,6 +331,21 @@ h1.game-title{
     Every choice you make shapes your mental energy.
     Learn to spot toxicity, set boundaries, and lock in on what matters — <em>you</em>.
   </p>
+  
+  <!-- OG Ray greeting -->
+  <div style="width:calc(100% - 32px);max-width:360px;margin:0 auto 8px;">
+    <div class="og-msg" style="align-items:flex-end;gap:9px;">
+      <div class="og-avatar-wrap">
+        <span class="og-avatar-emoji">🧔🏿</span>
+        <div class="og-avatar-name">OG Ray</div>
+      </div>
+      <div class="og-bubble og-side" style="animation:fadeIn .6s .2s both">
+        <div class="og-name">OG Ray</div>
+        Aye youngin, pull up. I been on these blocks 30 years — seen everything. I'm 'bout to put you in some real situations. How you respond tells me who you are. You ready?
+      </div>
+    </div>
+  </div>
+
   <div class="name-wrap">
     <span class="name-label">What they call you?</span>
     <input class="name-input" id="player-name" type="text" maxlength="20"
@@ -326,6 +359,7 @@ h1.game-title{
 
 <!-- ══ GAME SCREEN ══ -->
 <div class="screen" id="game-screen">
+  <div id="og-convo" class="og-convo"></div>
   <div class="scene-location" id="scene-location"></div>
   <div class="scene-title" id="scene-title"></div>
   <span class="scene-art" id="scene-art"></span>
@@ -397,6 +431,9 @@ h1.game-title{
     <div class="vh-bars" id="vh-bars"></div>
     <div class="vh-scene-nums" id="vh-nums"></div>
   </div>
+  
+  <div id="og-end-wrap" style="width:calc(100% - 32px);max-width:360px;margin:0 auto 20px;"></div>
+
   <button class="btn-primary" onclick="restartGame()">🔄 Run It Back</button>
   <button id="share-btn" class="btn-secondary" style="margin-top:12px;border-color:var(--purple);color:var(--purple)" onclick="shareScore()">📤 Share My Score</button>
   <button class="btn-secondary" style="margin-top:12px" onclick="showTips()">💡 Real Talk Tips</button>
@@ -646,6 +683,74 @@ function countUp(el, label, target, dur=1400){
   },16);
 }
 
+
+// ── OG RAY CHARACTER ───────────────────────────────────
+var ogIntros = [
+  "Marcus runnin' his mouth about you. First test: what you do when your name in somebody else\'s mouth?",
+  "The group chat. That\'s where loyalty gets exposed. Keisha just put your business in the street.",
+  "Jordan trying to use you. Old trick. You gone let him play you, or you gone hold your ground?",
+  "I know this corner. Stood here myself at your age. This right here — this where futures get decided.",
+  "That phone got more power over y\'all than anything on these streets. Don\'t let a screen tell you who you are.",
+  "Mr. Brooks been at this school 20 years. Real one. When a real one extends their hand — what you do?",
+  "The people you eat with shape who you become. New energy in that cafeteria. Don\'t sleep on it.",
+  "Last one, youngin. Look yourself in the mirror. After everything this week — what do you actually believe about yourself?"
+];
+var ogPos = [
+  "That\'s the move. I see you.",
+  "Real talk — that took strength. Most can\'t do that.",
+  "See? THAT\'S growth right there.",
+  "You learning. Keep that energy. That\'s how you build.",
+  "Exactly. THAT\'S what I been talking about.",
+  "That\'s the version of you that wins."
+];
+var ogNeg = [
+  "Nah... I made that same mistake. Cost me years, youngin.",
+  "That\'s the trap. Easy to fall in, hard to get out.",
+  "I feel you — but that ain\'t the way. Trust me on that.",
+  "You gone learn. Just make sure it don\'t cost you too much.",
+  "That right there is how they get you. Remember this feeling.",
+  "Seen too many good ones go down that road. You better than that."
+];
+
+function buildOGConvo(sceneIdx, playerN) {
+  var wrap = document.getElementById('og-convo');
+  if (!wrap) return;
+  var pName = playerN === 'You' ? 'You' : playerN;
+  var pInitial = pName.charAt(0).toUpperCase();
+  wrap.innerHTML =
+    '<div class="og-msg" style="align-items:flex-end;gap:9px;">' +
+      '<div class="og-avatar-wrap"><span class="og-avatar-emoji">🧔🏿</span><div class="og-avatar-name">OG Ray</div></div>' +
+      '<div class="og-bubble og-side"><div class="og-name">OG Ray</div>' + ogIntros[sceneIdx] + '</div>' +
+    '</div>' +
+    '<div class="og-msg player-msg" style="align-items:flex-end;gap:9px;">' +
+      '<div class="og-avatar-wrap"><span class="og-avatar-emoji" style="font-size:1.6rem;width:36px;height:36px;border-radius:50%;background:rgba(0,201,177,.2);display:flex;align-items:center;justify-content:center;font-style:normal;font-family:Inter,sans-serif;font-weight:800;color:var(--teal);">' + pInitial + '</span><div class="og-avatar-name">' + pName + '</div></div>' +
+      '<div class="og-bubble" style="background:rgba(0,201,177,.12);border:1px solid rgba(0,201,177,.25);"><div class="og-name" style="color:var(--teal);text-align:right;">You</div>Alright... let me think about this.</div>' +
+    '</div>';
+}
+
+function setOGFeedback(isPos) {
+  var el = document.getElementById('fb-og');
+  if (!el) return;
+  var lines = isPos ? ogPos : ogNeg;
+  var line = lines[Math.floor(Math.random() * lines.length)];
+  el.innerHTML = '<span>OG Ray:</span> \"' + line + '\"';
+}
+
+function buildOGEnd(score) {
+  var wrap = document.getElementById('og-end-wrap');
+  if (!wrap) return;
+  var msg;
+  if (score >= 85) msg = "That\'s my youngin right there. You handled yourself with class every step of the way. That ain\'t luck — that\'s character. The block needs more like you.";
+  else if (score >= 65) msg = "You did solid, for real. A few slips but you kept it moving. That\'s real life — you don\'t always get it perfect. What matters is you got back up.";
+  else if (score >= 40) msg = "You learning, and learning costs sometimes. I ain\'t mad at you. Just know every bad decision leaves a mark — make sure the marks teach you something.";
+  else msg = "Look — I ain\'t gone lie to you. It was rough out there. But you finished. Most don\'t even start. Now you know what to watch for. Run it back and show me different.";
+  wrap.innerHTML =
+    '<div class="og-msg" style="align-items:flex-end;gap:9px;">' +
+      '<div class="og-avatar-wrap"><span class="og-avatar-emoji">🧔🏿</span><div class="og-avatar-name">OG Ray</div></div>' +
+      '<div class="og-bubble og-side"><div class="og-name">OG Ray</div>' + msg + '</div>' +
+    '</div>';
+}
+
 // ── STATE ──────────────────────────────────────────────
 let vibe=50, sceneIndex=0, playerName='', vibeHistory=[], timerTO=null;
 
@@ -769,6 +874,7 @@ function loadScene(idx){
   const s=scenes[idx];
   setSceneBg(idx); soundWhoosh();
   const pn=playerName==='You'?'You':playerName;
+  buildOGConvo(idx, playerName);
   document.getElementById('scene-location').textContent=s.location;
   document.getElementById('scene-title').textContent=s.title;
   const artEl=document.getElementById('scene-art');
@@ -802,6 +908,7 @@ function makeChoice(choice){
   if(vibe>=90&&prevVibe<90) showToast('VIBES MAXED OUT','👑');
   else if(vibe>=75&&prevVibe<75) showToast("YOU'RE LOCKED IN",'🔥');
   else if(vibe<=25&&prevVibe>25) showToast('CHECK YOUR ENERGY','⚠️');
+  setOGFeedback(choice.delta>0);
   if(choice.delta>0){ haptic([40,30,80]); soundPositive(); spawnEmojis(['✨','🔥','💪','🚀','💛','🌟','👑']); }
   else { haptic([120]); soundNegative(); screenShake(); }
   var fb=document.getElementById('feedback');
@@ -856,6 +963,7 @@ function showEndScreen(){
     achWrap.innerHTML='<div class="achievement-banner"><div class="ach-icon">🌟</div><div class="ach-text"><h4>REAL ONE CERTIFIED</h4><p>Top tier score. You locked in and stayed locked in.</p></div></div>';
   }
   buildVibeChart();
+  buildOGEnd(v);
   showScreen('end-screen');
   if(v>=65){ [0,.1,.2,.3].forEach(function(d,i){ playTone([440,550,660,880][i],'sine',.25,.14,d); }); haptic([50,30,50,30,100]); }
   if(v>=85) setTimeout(launchConfetti,500);
