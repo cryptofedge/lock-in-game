@@ -73,24 +73,24 @@ h1.game-title{
 /* ── BUTTONS ── */
 .btn-primary{
   position:relative;overflow:hidden;
-  display:block;width:calc(100% - 48px);max-width:340px;padding:17px;
-  margin:0 auto 12px;border-radius:50px;border:none;
+  display:block;width:100%;max-width:none;padding:17px;
+  margin:0 0 0 0;border-radius:50px;border:none;
   background:linear-gradient(135deg,var(--orange),var(--yellow));
   color:var(--dark);font-family:'Inter',sans-serif;font-weight:800;
   font-size:1rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;
-  box-shadow:0 6px 28px rgba(244,124,32,.55);
+  box-shadow:0 4px 16px rgba(244,124,32,.5);
   animation:pulse 2.2s infinite,fadeIn .6s .7s both;
   transition:transform .15s;
 }
 .btn-primary:active{transform:scale(.97);animation:none;}
 @keyframes pulse{
-  0%,100%{box-shadow:0 6px 28px rgba(244,124,32,.55)}
-  50%{box-shadow:0 6px 44px rgba(244,124,32,.9),0 0 20px rgba(255,217,61,.3)}
+  0%,100%{box-shadow:0 4px 16px rgba(244,124,32,.5)}
+  50%{box-shadow:0 4px 22px rgba(244,124,32,.85),0 0 12px rgba(255,217,61,.25)}
 }
 .btn-secondary{
   position:relative;overflow:hidden;
-  display:block;width:calc(100% - 48px);max-width:340px;padding:15px;
-  margin:0 auto;border-radius:50px;border:2px solid var(--teal);
+  display:block;width:100%;max-width:none;padding:15px;
+  margin:0;border-radius:50px;border:2px solid var(--teal);
   background:transparent;color:var(--teal);font-family:'Inter',sans-serif;
   font-weight:700;font-size:.9rem;letter-spacing:1px;text-transform:uppercase;
   cursor:pointer;transition:background .2s,box-shadow .2s;
@@ -370,8 +370,10 @@ h1.game-title{
     <button class="photo-upload-btn" onclick="document.getElementById('photo-file-input').click()">📸 Upload Photo</button>
     <input id="photo-file-input" type="file" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)"/>
   </div>
-  <button class="btn-primary" id="start-btn" onclick="startGame()">▶ START THE GAME</button>
-  <button class="btn-secondary" onclick="showTips()" style="margin-top:8px">💡 Real Talk Tips</button>
+  <div style="width:100%;padding:0 28px;box-sizing:border-box;display:flex;flex-direction:column;gap:10px;margin-bottom:8px;">
+    <button class="btn-primary" id="start-btn" onclick="startGame()">▶ START THE GAME</button>
+    <button class="btn-secondary" onclick="showTips()">💡 Real Talk Tips</button>
+  </div>
   <div style="height:60px"></div>
 </div>
 
