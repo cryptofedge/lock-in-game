@@ -723,4 +723,178 @@ function showScreen(id){
   const el=document.getElementById(id);
   el.classList.add('active','fade-in');
   el.scrollTop=0;
-  setTimeout(()=>el.classLis
+  setTimeout(()=>el.classList.remove('fade-in'),400);
+}
+function showTips(){ document.getElementById('hud').classList.remove('visible'); setSceneBg(-1); showScreen('tips-screen'); }
+function startGame(){
+  try{ getAudio().resume(); }catch(e){}
+  playerName=(document.getElementById('player-name').value.trim())||'You';
+  vibe=50; sceneIndex=0; vibeHistory=[];
+  soundStart(); haptic([30,20,60]);
+  document.getElementById('hud').classList.add('visible');
+  showScreen('game-screen');
+  loadScene(0);
+}
+function restartGame(){ document.getElementById('hud').classList.remove('visible'); setSceneBg(-1); showScreen('title-screen'); }
+
+// ── HUD ────────────────────────────────────────────────
+function updateHUD(flash){
+  const v=Math.max(0,Math.min(100,vibe));
+  document.getElementById('meter-fill').style.width=v+'%';
+  const valEl=document.getElementById('meter-val');
+  valEl.textContent=v;
+  document.getElementById('scene-pill').textContent=`${sceneIndex+1}/8`;
+  if(flash){
+    valEl.classList.remove('pop');
+    requestAnimationFrame(()=>{ requestAnimationFrame(()=>valEl.classList.add('pop')); });
+    valEl.addEventListener('animationend',()=>valEl.classList.remove('pop'),{once:true});
+  }
+}
+
+// ── SWIPE ON CHOICES ───────────────────────────────────
+function addSwipeToBtn(btn, choiceData){
+  let sx=0, sy=0;
+  btn.addEventListener('touchstart',e=>{ sx=e.touches[0].clientX; sy=e.touches[0].clientY; },{passive:true});
+  btn.addEventListener('touchmove',e=>{ if(Math.abs(e.touches[0].clientX-sx)>20) btn.classList.add('swiping'); },{passive:true});
+  btn.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-sx;
+    const dy=e.changedTouches[0].clientY-sy;
+    btn.classList.remove('swiping');
+    if(dx>60&&Math.abs(dx)>Math.abs(dy)&&!btn.disabled){ e.preventDefault(); soundChoice(); makeChoice(choiceData); }
+  });
+}
+
+// ── LOAD SCENE ─────────────────────────────────────────
+function loadScene(idx){
+  const s=scenes[idx];
+  setSceneBg(idx); soundWhoosh();
+  const pn=playerName==='You'?'You':playerName;
+  document.getElementById('scene-location').textContent=s.location;
+  document.getElementById('scene-title').textContent=s.title;
+  const artEl=document.getElementById('scene-art');
+  artEl.textContent=s.art;
+  artEl.style.animation='none';
+  requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ artEl.style.animation=''; }); });
+  document.getElementById('scene-speaker').textContent=s.speaker;
+  typeWriter(document.getElementById('scene-text'), s.text.replace(/\bYou\b/g,pn), 15);
+  const wrap=document.getElementById('choices');
+  wrap.innerHTML='';
+  s.choices.forEach((c,i)=>{
+    const btn=document.createElement('button');
+    btn.className='choice-btn';
+    btn.style.animationDelay=i*90+'ms';
+    btn.innerHTML='<span class="choice-emoji">'+c.emoji+'</span><span>'+c.text+'</span>';
+    btn.addEventListener('click',function(e){ addRipple(btn,e); haptic([30]); soundChoice(); makeChoice(c); });
+    addSwipeToBtn(btn,c);
+    wrap.appendChild(btn);
+  });
+  document.getElementById('game-screen').scrollTop=0;
+  updateHUD(false);
+}
+
+// ── MAKE CHOICE ────────────────────────────────────────
+function makeChoice(choice){
+  document.querySelectorAll('.choice-btn').forEach(function(b){ b.disabled=true; b.style.opacity='.45'; });
+  var prevVibe=vibe;
+  vibe=Math.max(0,Math.min(100,vibe+choice.delta));
+  vibeHistory.push({scene:sceneIndex+1,vibe:vibe,delta:choice.delta});
+  updateHUD(true);
+  if(vibe>=90&&prevVibe<90) showToast('VIBES MAXED OUT','👑');
+  else if(vibe>=75&&prevVibe<75) showToast("YOU'RE LOCKED IN",'🔥');
+  else if(vibe<=25&&prevVibe>25) showToast('CHECK YOUR ENERGY','⚠️');
+  if(choice.delta>0){ haptic([40,30,80]); soundPositive(); spawnEmojis(['✨','🔥','💪','🚀','💛','🌟','👑']); }
+  else { haptic([120]); soundNegative(); screenShake(); }
+  var fb=document.getElementById('feedback');
+  fb.className='show feedback-'+(choice.fb.type==='pos'?'positive':'negative');
+  document.getElementById('fb-emoji').textContent=choice.fb.emoji;
+  document.getElementById('fb-title').textContent=choice.fb.title;
+  document.getElementById('fb-sub').textContent=choice.fb.sub;
+  var bar=document.getElementById('fb-timer');
+  bar.style.transition='none'; bar.style.width='100%';
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ bar.style.transition='width 3s linear'; bar.style.width='0%'; }); });
+  function advance(){
+    fb.className='';
+    clearTimeout(timerTO);
+    sceneIndex++;
+    if(sceneIndex>=scenes.length) showEndScreen();
+    else loadScene(sceneIndex);
+  }
+  fb.addEventListener('click',advance,{once:true});
+  timerTO=setTimeout(function(){ fb.removeEventListener('click',advance); advance(); },3000);
+}
+
+// ── END SCREEN ─────────────────────────────────────────
+function showEndScreen(){
+  document.getElementById('hud').classList.remove('visible');
+  setSceneBg(-1);
+  var v=Math.max(0,Math.min(100,vibe));
+  var prev=0;
+  try{ prev=parseInt(localStorage.getItem('lockin_best')||'0'); }catch(e){}
+  var isNew=v>prev;
+  try{ if(isNew) localStorage.setItem('lockin_best',v); }catch(e){}
+  var badge,title,msg;
+  if(v>=85){ badge='👑'; title='MAIN CHARACTER';
+    msg=(playerName==='You'?'You':playerName)+' played the whole game choosing YOU. Handled drama with class, set boundaries like a boss, and refused to let toxic energy live rent free. That\'s not just a game score — that\'s a real life skill set.';}
+  else if(v>=65){ badge='🔥'; title='LOCKED IN';
+    msg='You made mostly power moves. A few slips, but you bounced back — which is exactly what real resilience looks like. Keep building.';}
+  else if(v>=40){ badge='🌱'; title='GROWING';
+    msg="Some tough calls, some missed ones. But you finished and that matters. Real growth is slow and bumpy. The fact you're thinking about this puts you ahead.";}
+  else{ badge='💛'; title='KEEP GOING';
+    msg="The situations got heavy. But guess what? That's real life sometimes. The point isn't perfection — it's awareness. Now you know what to watch for.";}
+  document.getElementById('end-badge').textContent=badge;
+  document.getElementById('end-title').textContent=title;
+  document.getElementById('end-best').textContent=isNew?'🏆 New best score!':'Best: '+prev+' / 100';
+  document.getElementById('end-msg').textContent=msg;
+  var scoreEl=document.getElementById('end-score');
+  scoreEl.textContent='Vibe Score: 0 / 100';
+  setTimeout(function(){ countUp(scoreEl,'Vibe Score: ',v,1400); },400);
+  var achWrap=document.getElementById('achievement-wrap');
+  achWrap.innerHTML='';
+  if(vibeHistory.every(function(h){ return h.delta>0; })){
+    achWrap.innerHTML='<div class="achievement-banner"><div class="ach-icon">🏅</div><div class="ach-text"><h4>FLAWLESS VIBES</h4><p>You made every right call. That\'s elite mental strength.</p></div></div>';
+  } else if(v>=85){
+    achWrap.innerHTML='<div class="achievement-banner"><div class="ach-icon">🌟</div><div class="ach-text"><h4>REAL ONE CERTIFIED</h4><p>Top tier score. You locked in and stayed locked in.</p></div></div>';
+  }
+  buildVibeChart();
+  showScreen('end-screen');
+  if(v>=65){ [0,.1,.2,.3].forEach(function(d,i){ playTone([440,550,660,880][i],'sine',.25,.14,d); }); haptic([50,30,50,30,100]); }
+  if(v>=85) setTimeout(launchConfetti,500);
+}
+
+// ── VIBE CHART ─────────────────────────────────────────
+function buildVibeChart(){
+  var barsEl=document.getElementById('vh-bars');
+  var numsEl=document.getElementById('vh-nums');
+  barsEl.innerHTML=''; numsEl.innerHTML='';
+  var chartData=[{scene:'S',vibe:50,delta:1,isStart:true}].concat(vibeHistory);
+  chartData.forEach(function(h){
+    var bar=document.createElement('div');
+    bar.className=h.isStart?'vh-bar start':(h.delta<0?'vh-bar neg':'vh-bar');
+    bar.style.height='0px';
+    barsEl.appendChild(bar);
+    setTimeout(function(){ bar.style.height=(h.vibe/100*48)+'px'; },200);
+    var num=document.createElement('div');
+    num.className='vh-num';
+    num.textContent=h.scene;
+    numsEl.appendChild(num);
+  });
+}
+
+// ── SHARE ──────────────────────────────────────────────
+function shareScore(){
+  var v=Math.max(0,Math.min(100,vibe));
+  var badge=v>=85?'👑':v>=65?'🔥':v>=40?'🌱':'💛';
+  var name=playerName==='You'?'I':playerName;
+  var shareText=badge+' '+name+' scored '+v+'/100 on LOCK IN — the mental health game for real ones. Can you beat me?\n\nhttps://cryptofedge.github.io/lock-in-game/';
+  haptic([40]);
+  if(navigator.share){
+    navigator.share({title:'LOCK IN',text:shareText,url:'https://cryptofedge.github.io/lock-in-game/'}).catch(function(){});
+  } else {
+    navigator.clipboard.writeText(shareText)
+      .then(function(){ alert('Score copied! Paste it anywhere 🔥'); })
+      .catch(function(){ alert('Share this:\n\n'+shareText); });
+  }
+}
+</script>
+</body>
+</html>
