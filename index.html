@@ -6,314 +6,133 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#0D0D0D"/>
+<meta name="description" content="A choice-based mental health game for urban youth. Built by FEDGE 2.O."/>
+<link rel="manifest" href="manifest.json"/>
 <title>LOCK IN</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600;700;800&display=swap');
 
 :root {
-  --orange: #F47C20;
-  --yellow: #FFD93D;
-  --teal:   #00C9B1;
-  --purple: #9B5DE5;
-  --coral:  #FF6B6B;
-  --mint:   #6BCB77;
-  --dark:   #0D0D0D;
-  --card:   #1A1A2E;
-  --text:   #F0F0F0;
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --orange:#F47C20; --yellow:#FFD93D; --teal:#00C9B1;
+  --purple:#9B5DE5; --coral:#FF6B6B; --mint:#6BCB77;
+  --dark:#0D0D0D; --card:#1A1A2E; --text:#F0F0F0;
+  --safe-bottom:env(safe-area-inset-bottom,0px);
 }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);color:var(--text);font-family:'Inter',sans-serif;touch-action:manipulation;}
 
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+/* STARS */
+#stars{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 30% 20%,#1a0533 0%,#0D0D0D 65%);}
+.star{position:absolute;border-radius:50%;background:white;animation:twinkle 3s infinite alternate;}
+@keyframes twinkle{from{opacity:.15}to{opacity:.9}}
 
-html, body {
-  width: 100%; height: 100%;
-  overflow: hidden;
-  background: var(--dark);
-  color: var(--text);
-  font-family: 'Inter', sans-serif;
-  touch-action: manipulation;
-}
+/* SCREENS */
+.screen{position:fixed;inset:0;z-index:1;display:none;flex-direction:column;align-items:center;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 0 calc(20px + var(--safe-bottom)) 0;transition:opacity .25s;}
+.screen.active{display:flex;}
+.screen.fade-in{animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 
-/* ── STAR BG ── */
-#stars {
-  position: fixed; inset: 0; z-index: 0;
-  background: radial-gradient(ellipse at 30% 20%, #1a0533 0%, #0D0D0D 65%);
-}
-.star {
-  position: absolute; border-radius: 50%; background: white;
-  animation: twinkle 3s infinite alternate;
-}
-@keyframes twinkle { from{opacity:.15} to{opacity:.9} }
+/* TITLE SCREEN */
+#title-screen{justify-content:flex-start;padding-top:40px;text-align:center;}
+.logo-wrap{margin-bottom:10px;animation:floatY 3s ease-in-out infinite alternate;}
+.logo-wrap img{width:90px;height:90px;filter:drop-shadow(0 0 20px rgba(244,124,32,.7));}
+@keyframes floatY{from{transform:translateY(0)}to{transform:translateY(-8px)}}
+h1.game-title{font-family:'Orbitron',sans-serif;font-size:2.8rem;font-weight:900;background:linear-gradient(120deg,var(--orange),var(--yellow),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:4px;line-height:1.1;filter:drop-shadow(0 0 16px rgba(244,124,32,.4));}
+.tagline{font-size:.7rem;color:var(--teal);letter-spacing:2.5px;text-transform:uppercase;font-weight:700;margin:6px 0 16px;}
+.intro-text{font-size:.92rem;color:rgba(255,255,255,.8);line-height:1.7;padding:0 28px;margin-bottom:20px;max-width:400px;}
+.intro-text strong{color:var(--yellow);}
 
-/* ── SCREENS ── */
-.screen {
-  position: fixed; inset: 0; z-index: 1;
-  display: none; flex-direction: column;
-  align-items: center;
-  overflow-y: auto; overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  padding: 0 0 calc(20px + var(--safe-bottom)) 0;
-}
-.screen.active { display: flex; }
+/* NAME INPUT */
+.name-wrap{width:calc(100% - 48px);max-width:340px;margin:0 auto 16px;}
+.name-label{font-size:.7rem;color:var(--teal);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:8px;text-align:left;display:block;}
+.name-input{width:100%;padding:14px 18px;border-radius:50px;border:2px solid rgba(0,201,177,.4);background:var(--card);color:var(--text);font-family:'Inter',sans-serif;font-size:1rem;font-weight:600;outline:none;transition:border-color .2s;}
+.name-input:focus{border-color:var(--teal);}
+.name-input::placeholder{color:rgba(255,255,255,.25);}
 
-/* ══════════════════════════════════
-   TITLE SCREEN
-══════════════════════════════════ */
-#title-screen {
-  justify-content: flex-start;
-  padding-top: 48px;
-  text-align: center;
-}
+/* BUTTONS */
+.btn-primary{display:block;width:calc(100% - 48px);max-width:340px;padding:17px;margin:0 auto 12px;border-radius:50px;border:none;background:linear-gradient(135deg,var(--orange),var(--yellow));color:var(--dark);font-family:'Inter',sans-serif;font-weight:800;font-size:1rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;box-shadow:0 6px 28px rgba(244,124,32,.55);animation:pulse 2.2s infinite;transition:transform .15s;}
+.btn-primary:active{transform:scale(.97);animation:none;}
+@keyframes pulse{0%,100%{box-shadow:0 6px 28px rgba(244,124,32,.55)}50%{box-shadow:0 6px 44px rgba(244,124,32,.85)}}
+.btn-secondary{display:block;width:calc(100% - 48px);max-width:340px;padding:15px;margin:0 auto;border-radius:50px;border:2px solid var(--teal);background:transparent;color:var(--teal);font-family:'Inter',sans-serif;font-weight:700;font-size:.9rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:background .2s;}
+.btn-secondary:active{background:rgba(0,201,177,.15);}
 
-.logo-wrap {
-  margin-bottom: 12px;
-  animation: floatY 3s ease-in-out infinite alternate;
-}
-.logo-wrap img {
-  width: 100px; height: 100px;
-  filter: drop-shadow(0 0 20px rgba(244,124,32,.7));
-}
-@keyframes floatY {
-  from { transform: translateY(0px); }
-  to   { transform: translateY(-8px); }
-}
+/* HUD */
+#hud{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(13,13,13,.92);backdrop-filter:blur(10px);padding:10px 16px;display:none;align-items:center;gap:10px;border-bottom:1px solid rgba(244,124,32,.25);}
+#hud.visible{display:flex;}
+.hud-label{font-size:.68rem;font-weight:800;color:var(--orange);text-transform:uppercase;letter-spacing:1px;white-space:nowrap;}
+.meter-bar{flex:1;height:10px;border-radius:20px;background:rgba(255,255,255,.1);overflow:hidden;}
+.meter-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--coral),var(--yellow),var(--teal),var(--mint));transition:width .7s cubic-bezier(.4,0,.2,1);}
+.meter-val{font-family:'Orbitron',sans-serif;font-size:.78rem;font-weight:700;color:var(--yellow);min-width:36px;text-align:right;}
+.scene-pill{font-size:.65rem;color:rgba(255,255,255,.35);white-space:nowrap;font-weight:600;}
 
-h1.game-title {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 3rem; font-weight: 900;
-  background: linear-gradient(120deg, var(--orange), var(--yellow), var(--teal));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  letter-spacing: 4px; line-height: 1.1;
-  filter: drop-shadow(0 0 16px rgba(244,124,32,.4));
-}
-.tagline {
-  font-size: .72rem; color: var(--teal);
-  letter-spacing: 2.5px; text-transform: uppercase;
-  font-weight: 700; margin: 8px 0 20px;
-}
-.intro-text {
-  font-size: .95rem; color: rgba(255,255,255,.8);
-  line-height: 1.75; padding: 0 28px;
-  margin-bottom: 28px; max-width: 400px;
-}
-.intro-text strong { color: var(--yellow); }
+/* GAME SCREEN */
+#game-screen{padding-top:60px;justify-content:flex-start;text-align:center;}
+.scene-location{font-size:.68rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--purple);margin:16px 20px 6px;line-height:1.4;}
+.scene-title{font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:700;background:linear-gradient(120deg,var(--yellow),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;padding:0 20px;margin-bottom:14px;line-height:1.3;}
+.scene-art{font-size:3.5rem;margin-bottom:12px;animation:popIn .35s ease;display:block;}
+@keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.dialogue-box{background:var(--card);border-left:3px solid var(--orange);border-radius:0 14px 14px 0;padding:14px 16px;margin:0 16px 18px;text-align:left;line-height:1.65;font-size:.92rem;}
+.speaker{font-weight:800;color:var(--orange);font-size:.7rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.choices-label{font-size:.68rem;color:var(--teal);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:10px;}
+.choice-btn{display:flex;align-items:flex-start;gap:10px;width:calc(100% - 32px);margin:0 16px 10px;padding:16px 14px;border-radius:14px;border:2px solid rgba(255,255,255,.07);background:var(--card);color:var(--text);font-family:'Inter',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;text-align:left;line-height:1.45;transition:border-color .15s,background .15s,transform .1s;}
+.choice-btn:active{border-color:var(--teal);background:rgba(0,201,177,.12);transform:scale(.98);}
+.choice-emoji{font-size:1.3rem;flex-shrink:0;margin-top:1px;}
+.choices-spacer{height:20px;}
 
-.btn-primary {
-  display: block; width: calc(100% - 48px); max-width: 340px;
-  padding: 18px; margin: 0 auto 14px;
-  border-radius: 50px; border: none;
-  background: linear-gradient(135deg, var(--orange), var(--yellow));
-  color: var(--dark); font-family: 'Inter', sans-serif;
-  font-weight: 800; font-size: 1rem;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  cursor: pointer;
-  box-shadow: 0 6px 28px rgba(244,124,32,.55);
-  animation: pulse 2.2s infinite;
-  transition: transform .15s, box-shadow .15s;
-}
-.btn-primary:active { transform: scale(.97); box-shadow: 0 3px 14px rgba(244,124,32,.4); animation: none; }
-@keyframes pulse {
-  0%,100% { box-shadow: 0 6px 28px rgba(244,124,32,.55); }
-  50%      { box-shadow: 0 6px 44px rgba(244,124,32,.85); }
-}
+/* FEEDBACK OVERLAY */
+#feedback{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:32px 28px;background:rgba(0,0,0,.9);backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity .25s;}
+#feedback.show{opacity:1;pointer-events:all;}
+.fb-emoji{font-size:4.5rem;animation:popIn .35s ease;}
+.fb-title{font-family:'Orbitron',sans-serif;font-size:1.25rem;font-weight:700;text-align:center;line-height:1.3;}
+.fb-sub{font-size:.9rem;color:rgba(255,255,255,.7);text-align:center;line-height:1.65;max-width:320px;}
+.feedback-positive .fb-title{color:var(--mint);}
+.feedback-negative .fb-title{color:var(--coral);}
+.fb-tap-hint{font-size:.7rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:2px;margin-top:4px;}
+/* Countdown bar */
+.fb-timer-wrap{width:180px;height:3px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;}
+.fb-timer-bar{height:100%;border-radius:3px;background:var(--teal);width:100%;transition:width linear;}
 
-.btn-secondary {
-  display: block; width: calc(100% - 48px); max-width: 340px;
-  padding: 16px; margin: 0 auto;
-  border-radius: 50px; border: 2px solid var(--teal);
-  background: transparent; color: var(--teal);
-  font-family: 'Inter', sans-serif; font-weight: 700;
-  font-size: .9rem; letter-spacing: 1px; text-transform: uppercase;
-  cursor: pointer; transition: background .2s;
-}
-.btn-secondary:active { background: rgba(0,201,177,.15); }
+/* TIPS */
+#tips-screen{padding-top:36px;text-align:center;}
+.tips-header{font-family:'Orbitron',sans-serif;font-size:1.5rem;color:var(--teal);margin-bottom:4px;}
+.tips-sub{font-size:.78rem;color:rgba(255,255,255,.45);margin-bottom:20px;letter-spacing:1px;}
+.tip-card{background:var(--card);border-radius:16px;padding:16px 18px;margin:0 16px 12px;border-top:3px solid var(--teal);text-align:left;}
+.tip-card .tip-icon{font-size:1.6rem;margin-bottom:8px;display:block;}
+.tip-card h3{font-size:.92rem;font-weight:800;color:var(--yellow);margin-bottom:5px;}
+.tip-card p{font-size:.84rem;color:rgba(255,255,255,.68);line-height:1.55;}
 
-/* ══════════════════════════════════
-   HUD BAR
-══════════════════════════════════ */
-#hud {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
-  background: rgba(13,13,13,.92);
-  backdrop-filter: blur(10px);
-  padding: 10px 16px 10px;
-  display: none; align-items: center; gap: 10px;
-  border-bottom: 1px solid rgba(244,124,32,.25);
-}
-#hud.visible { display: flex; }
-.hud-label {
-  font-size: .68rem; font-weight: 800; color: var(--orange);
-  text-transform: uppercase; letter-spacing: 1px; white-space: nowrap;
-}
-.meter-bar {
-  flex: 1; height: 10px; border-radius: 20px;
-  background: rgba(255,255,255,.1); overflow: hidden;
-}
-.meter-fill {
-  height: 100%; border-radius: 20px;
-  background: linear-gradient(90deg, var(--coral), var(--yellow), var(--teal), var(--mint));
-  transition: width .7s cubic-bezier(.4,0,.2,1);
-}
-.meter-val {
-  font-family: 'Orbitron', sans-serif;
-  font-size: .78rem; font-weight: 700; color: var(--yellow);
-  min-width: 36px; text-align: right;
-}
-.scene-pill {
-  font-size: .65rem; color: rgba(255,255,255,.35);
-  white-space: nowrap; font-weight: 600;
-}
+/* END SCREEN */
+#end-screen{padding-top:40px;text-align:center;}
+.end-badge{font-size:4.5rem;animation:popIn .5s ease;margin-bottom:8px;display:block;}
+.end-title{font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:900;margin-bottom:6px;background:linear-gradient(120deg,var(--orange),var(--yellow));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.end-score{font-size:1rem;color:var(--yellow);margin-bottom:4px;font-weight:700;}
+.end-best{font-size:.78rem;color:var(--teal);margin-bottom:14px;font-weight:600;}
+.end-msg{font-size:.9rem;color:rgba(255,255,255,.75);line-height:1.7;padding:0 24px;margin-bottom:20px;max-width:360px;}
 
-/* ══════════════════════════════════
-   GAME SCREEN
-══════════════════════════════════ */
-#game-screen {
-  padding-top: 60px;
-  justify-content: flex-start;
-  text-align: center;
-}
+/* VIBE HISTORY */
+.vibe-history{width:calc(100% - 32px);max-width:360px;background:var(--card);border-radius:16px;padding:14px 16px;margin:0 auto 20px;text-align:left;}
+.vh-label{font-size:.68rem;color:var(--teal);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:10px;}
+.vh-bars{display:flex;align-items:flex-end;gap:4px;height:48px;}
+.vh-bar{flex:1;border-radius:4px 4px 0 0;background:var(--teal);min-height:4px;transition:height .5s ease;position:relative;}
+.vh-bar.neg{background:var(--coral);}
+.vh-scene-nums{display:flex;gap:4px;margin-top:4px;}
+.vh-num{flex:1;text-align:center;font-size:.6rem;color:rgba(255,255,255,.3);}
 
-.scene-location {
-  font-size: .68rem; font-weight: 700; letter-spacing: 2.5px;
-  text-transform: uppercase; color: var(--purple);
-  margin: 16px 20px 6px; line-height: 1.4;
-}
-.scene-title {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 1.45rem; font-weight: 700;
-  background: linear-gradient(120deg, var(--yellow), var(--orange));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  padding: 0 20px; margin-bottom: 14px; line-height: 1.3;
-}
-.scene-art {
-  font-size: 3.8rem; margin-bottom: 14px;
-  animation: popIn .35s ease;
-  display: block;
-}
-@keyframes popIn { from{transform:scale(.5);opacity:0} to{transform:scale(1);opacity:1} }
+/* ACHIEVEMENT */
+.achievement-banner{background:linear-gradient(135deg,rgba(155,93,229,.3),rgba(0,201,177,.3));border:1px solid var(--purple);border-radius:14px;padding:12px 16px;margin:0 16px 16px;display:flex;align-items:center;gap:12px;}
+.ach-icon{font-size:1.8rem;flex-shrink:0;}
+.ach-text h4{font-size:.85rem;font-weight:800;color:var(--purple);margin-bottom:2px;}
+.ach-text p{font-size:.78rem;color:rgba(255,255,255,.6);}
 
-.dialogue-box {
-  background: var(--card);
-  border-left: 3px solid var(--orange);
-  border-radius: 0 14px 14px 0;
-  padding: 14px 16px;
-  margin: 0 16px 20px;
-  text-align: left; line-height: 1.65; font-size: .92rem;
-}
-.speaker {
-  font-weight: 800; color: var(--orange);
-  font-size: .7rem; text-transform: uppercase;
-  letter-spacing: 1px; margin-bottom: 6px;
-}
+.crisis-note{font-size:.72rem;color:rgba(255,255,255,.3);padding:0 28px;line-height:1.7;margin-top:16px;margin-bottom:8px;}
+.crisis-note strong{color:var(--teal);}
 
-.choices-label {
-  font-size: .68rem; color: var(--teal);
-  text-transform: uppercase; letter-spacing: 2px;
-  font-weight: 700; margin-bottom: 10px;
-}
-
-.choice-btn {
-  display: flex; align-items: flex-start; gap: 10px;
-  width: calc(100% - 32px); margin: 0 16px 10px;
-  padding: 16px 14px;
-  border-radius: 14px; border: 2px solid rgba(255,255,255,.07);
-  background: var(--card); color: var(--text);
-  font-family: 'Inter', sans-serif;
-  font-size: .9rem; font-weight: 600;
-  cursor: pointer; text-align: left; line-height: 1.45;
-  transition: border-color .15s, background .15s;
-}
-.choice-btn:active {
-  border-color: var(--teal);
-  background: rgba(0,201,177,.12);
-  transform: scale(.98);
-}
-.choice-emoji { font-size: 1.3rem; flex-shrink: 0; margin-top: 1px; }
-
-.choices-spacer { height: 20px; }
-
-/* ══════════════════════════════════
-   FEEDBACK OVERLAY
-══════════════════════════════════ */
-#feedback {
-  position: fixed; inset: 0; z-index: 200;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 14px; padding: 32px 28px;
-  background: rgba(0,0,0,.88);
-  backdrop-filter: blur(10px);
-  opacity: 0; pointer-events: none;
-  transition: opacity .25s;
-}
-#feedback.show { opacity: 1; pointer-events: all; }
-.fb-emoji { font-size: 4.5rem; animation: popIn .35s ease; }
-.fb-title {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 1.3rem; font-weight: 700;
-  text-align: center; line-height: 1.3;
-}
-.fb-sub {
-  font-size: .92rem; color: rgba(255,255,255,.7);
-  text-align: center; line-height: 1.65; max-width: 320px;
-}
-.feedback-positive .fb-title { color: var(--mint); }
-.feedback-negative .fb-title { color: var(--coral); }
-
-/* ══════════════════════════════════
-   TIPS SCREEN
-══════════════════════════════════ */
-#tips-screen {
-  padding-top: 36px; text-align: center;
-}
-.tips-header {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 1.5rem; color: var(--teal);
-  margin-bottom: 4px;
-}
-.tips-sub {
-  font-size: .78rem; color: rgba(255,255,255,.45);
-  margin-bottom: 20px; letter-spacing: 1px;
-}
-.tip-card {
-  background: var(--card);
-  border-radius: 16px; padding: 16px 18px;
-  margin: 0 16px 12px;
-  border-top: 3px solid var(--teal);
-  text-align: left;
-}
-.tip-card .tip-icon { font-size: 1.6rem; margin-bottom: 8px; display: block; }
-.tip-card h3 { font-size: .92rem; font-weight: 800; color: var(--yellow); margin-bottom: 5px; }
-.tip-card p { font-size: .84rem; color: rgba(255,255,255,.68); line-height: 1.55; }
-
-/* ══════════════════════════════════
-   END SCREEN
-══════════════════════════════════ */
-#end-screen {
-  padding-top: 52px; text-align: center;
-}
-.end-badge { font-size: 5rem; animation: popIn .5s ease; margin-bottom: 10px; display: block; }
-.end-title {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 1.7rem; font-weight: 900; margin-bottom: 8px;
-  background: linear-gradient(120deg, var(--orange), var(--yellow));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-}
-.end-score { font-size: 1rem; color: var(--yellow); margin-bottom: 16px; font-weight: 700; }
-.end-msg {
-  font-size: .92rem; color: rgba(255,255,255,.75);
-  line-height: 1.7; padding: 0 24px;
-  margin-bottom: 28px; max-width: 360px;
-}
-.crisis-note {
-  font-size: .75rem; color: rgba(255,255,255,.3);
-  padding: 0 28px; line-height: 1.7;
-  margin-top: 20px; margin-bottom: 10px;
-}
-.crisis-note strong { color: var(--teal); }
+/* SOUND BTN */
+#sound-btn{position:fixed;bottom:calc(16px + var(--safe-bottom));right:16px;z-index:60;width:40px;height:40px;border-radius:50%;background:rgba(26,26,46,.9);border:1px solid rgba(255,255,255,.1);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
 </style>
 </head>
 <body>
 
-<!-- STARS -->
 <div id="stars"></div>
 
 <!-- HUD -->
@@ -329,9 +148,14 @@ h1.game-title {
   <div class="fb-emoji" id="fb-emoji"></div>
   <div class="fb-title" id="fb-title"></div>
   <div class="fb-sub" id="fb-sub"></div>
+  <div class="fb-timer-wrap"><div class="fb-timer-bar" id="fb-timer"></div></div>
+  <div class="fb-tap-hint">tap to continue</div>
 </div>
 
-<!-- ══════ TITLE SCREEN ══════ -->
+<!-- SOUND BUTTON -->
+<button id="sound-btn" onclick="toggleSound()" title="Toggle Sound">🔊</button>
+
+<!-- ══ TITLE SCREEN ══ -->
 <div class="screen active" id="title-screen">
   <div class="logo-wrap">
     <img src="logo.png" alt="FEDGE 2.O"/>
@@ -342,15 +166,20 @@ h1.game-title {
     School life in the city hits different. Drama, fake friends, pressure —
     it's all coming at you. But here's the truth nobody tells you:<br><br>
     <strong>You control your own vibe.</strong><br><br>
-    Every choice you make shapes your mental energy. Learn to spot toxicity,
-    set boundaries, and lock in on what actually matters — <em>you</em>.
+    Every choice you make shapes your mental energy.
+    Learn to spot toxicity, set boundaries, and lock in on what matters — <em>you</em>.
   </p>
+  <div class="name-wrap">
+    <span class="name-label">What they call you?</span>
+    <input class="name-input" id="player-name" type="text" maxlength="20"
+           placeholder="Enter your name..." autocomplete="off" autocorrect="off" spellcheck="false"/>
+  </div>
   <button class="btn-primary" onclick="startGame()">▶ START THE GAME</button>
-  <button class="btn-secondary" onclick="showTips()" style="margin-top:0">💡 Mental Health Tips</button>
-  <div style="height:40px"></div>
+  <button class="btn-secondary" onclick="showTips()" style="margin-top:0">💡 Real Talk Tips</button>
+  <div style="height:60px"></div>
 </div>
 
-<!-- ══════ GAME SCREEN ══════ -->
+<!-- ══ GAME SCREEN ══ -->
 <div class="screen" id="game-screen">
   <div class="scene-location" id="scene-location"></div>
   <div class="scene-title" id="scene-title"></div>
@@ -364,14 +193,13 @@ h1.game-title {
   <div class="choices-spacer"></div>
 </div>
 
-<!-- ══════ TIPS SCREEN ══════ -->
+<!-- ══ TIPS SCREEN ══ -->
 <div class="screen" id="tips-screen">
   <div class="logo-wrap" style="margin-top:20px">
     <img src="logo.png" alt="FEDGE 2.O" style="width:70px;height:70px"/>
   </div>
   <div class="tips-header">REAL TALK</div>
   <div class="tips-sub">Mental health facts that actually matter</div>
-
   <div class="tip-card">
     <span class="tip-icon">🚫</span>
     <h3>Cut the Deadweight</h3>
@@ -402,23 +230,33 @@ h1.game-title {
     <h3>You Already Got It</h3>
     <p>Confidence isn't something you find — you build it every time you choose yourself. Each good decision is a rep.</p>
   </div>
-
   <button class="btn-primary" onclick="startGame()" style="margin-top:20px">▶ Let's Play</button>
   <button class="btn-secondary" style="margin-top:12px" onclick="showScreen('title-screen')">← Back</button>
   <div style="height:40px"></div>
 </div>
 
-<!-- ══════ END SCREEN ══════ -->
+<!-- ══ END SCREEN ══ -->
 <div class="screen" id="end-screen">
-  <div class="logo-wrap" style="margin-top:40px">
+  <div class="logo-wrap" style="margin-top:32px">
     <img src="logo.png" alt="FEDGE 2.O"/>
   </div>
   <span class="end-badge" id="end-badge"></span>
   <div class="end-title" id="end-title"></div>
   <div class="end-score" id="end-score"></div>
+  <div class="end-best" id="end-best"></div>
+  <div id="achievement-wrap"></div>
   <p class="end-msg" id="end-msg"></p>
+
+  <!-- Vibe History Chart -->
+  <div class="vibe-history" id="vibe-history-wrap">
+    <div class="vh-label">Your Vibe Journey</div>
+    <div class="vh-bars" id="vh-bars"></div>
+    <div class="vh-scene-nums" id="vh-nums"></div>
+  </div>
+
   <button class="btn-primary" onclick="restartGame()">🔄 Run It Back</button>
-  <button class="btn-secondary" style="margin-top:12px" onclick="showTips()">💡 Mental Health Tips</button>
+  <button id="share-btn" class="btn-secondary" style="margin-top:12px;border-color:var(--purple);color:var(--purple)" onclick="shareScore()">📤 Share My Score</button>
+  <button class="btn-secondary" style="margin-top:12px" onclick="showTips()">💡 Real Talk Tips</button>
   <p class="crisis-note">
     If you're going through something real, don't lock that in.<br>
     Text <strong>HOME to 741741</strong> — Crisis Text Line, free & confidential 24/7.<br>
@@ -428,135 +266,124 @@ h1.game-title {
 </div>
 
 <script>
-// ── STARS ──────────────────────────────
+// ── STARS ──────────────────────────────────────────────
 (function(){
-  const c = document.getElementById('stars');
+  const c=document.getElementById('stars');
   for(let i=0;i<80;i++){
-    const s = document.createElement('div');
-    s.className = 'star';
-    const sz = Math.random()*2.5+.5;
+    const s=document.createElement('div');
+    s.className='star';
+    const sz=Math.random()*2.5+.5;
     s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;animation-delay:${Math.random()*5}s;animation-duration:${2+Math.random()*4}s;`;
     c.appendChild(s);
   }
 })();
 
-// ── STATE ──────────────────────────────
-let vibe = 50, sceneIndex = 0;
+// ── AUDIO ──────────────────────────────────────────────
+let audioCtx=null, soundOn=true;
+function getAudio(){
+  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+function playTone(freq,type,dur,vol=.18,delay=0){
+  if(!soundOn) return;
+  try{
+    const ctx=getAudio();
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type=type; o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,ctx.currentTime+delay);
+    g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+delay+dur);
+    o.start(ctx.currentTime+delay);
+    o.stop(ctx.currentTime+delay+dur);
+  }catch(e){}
+}
+function soundChoice(){playTone(440,'sine',.08,.15);setTimeout(()=>playTone(550,'sine',.08,.12),60);}
+function soundPositive(){[0,.07,.14].forEach((d,i)=>playTone([523,659,784][i],'sine',.18,.16,d));}
+function soundNegative(){playTone(220,'sawtooth',.25,.1);setTimeout(()=>playTone(180,'sawtooth',.2,.08),120);}
+function soundStart(){[0,.1,.2].forEach((d,i)=>playTone([330,440,550][ i],'sine',.2,.14,d));}
+function toggleSound(){
+  soundOn=!soundOn;
+  document.getElementById('sound-btn').textContent=soundOn?'🔊':'🔇';
+}
 
-// ── SCENES ─────────────────────────────
-const scenes = [
-  {
-    location:"📍 School Hallway • Monday 8am",
-    title:"First Day Back",
-    art:"🏫",
-    speaker:"Your Homie Dre",
-    text:`"Aye, you hear what Marcus been sayin'? He out here telling everyone you snitched 'cause you told the teacher about the fight. The whole school on it."`,
-    choices:[
-      {emoji:"😤",text:"Go find Marcus rn and check him in front of everyone",delta:-15,fb:{type:"neg",emoji:"💀",title:"Nah fam, that ain't it.",sub:"Confronting him publicly just adds fuel to the fire. You gave away your peace for drama that won't last."}},
-      {emoji:"🧘",text:"Deadass — let it go. Anyone who believes that don't know me.",delta:+18,fb:{type:"pos",emoji:"✨",title:"That's main character energy!",sub:"You chose your peace over the noise. Real ones who know you will always know. Don't let cap live rent free in your head."}},
-      {emoji:"😔",text:"Lowkey hurt. Go to the bathroom and stress alone.",delta:-8,fb:{type:"neg",emoji:"💭",title:"Bottling it up ain't healthy either.",sub:"It's okay to feel hurt — but isolating and stressing solo drains your vibe. Try talking to someone you actually trust."}},
-      {emoji:"🗣️",text:"Tell Dre to drop it, then walk to class with your head up.",delta:+12,fb:{type:"pos",emoji:"🔥",title:"Locked in!",sub:"You kept your composure AND redirected the energy. That's emotional intelligence. That's power."}}
-    ]
-  },
-  {
-    location:"📍 Lunch Table • 12:15pm",
-    title:"The Group Chat Move",
-    art:"📱",
-    speaker:"The Situation",
-    text:`You open your phone and your "friend" Keisha posted something personal you told her in the group chat. Everybody's reacting with laughing emojis. Your chest gets tight.`,
-    choices:[
-      {emoji:"😡",text:"Send the most savage clapback. She violated.",delta:-10,fb:{type:"neg",emoji:"⚡",title:"The satisfaction is temporary.",sub:"A clapback feels good for 2 minutes, but dragging it in the group chat keeps you stuck in the toxicity."}},
-      {emoji:"🚪",text:"Leave the group chat. Right now. No explanation.",delta:+20,fb:{type:"pos",emoji:"🚀",title:"THAT'S how you remove toxicity!",sub:"No arguing, no begging. You just removed yourself. Removing access to your life is always an option."}},
-      {emoji:"🤝",text:"Confront Keisha privately and calmly — no audience.",delta:+15,fb:{type:"pos",emoji:"💬",title:"Facts. Handle it like an adult.",sub:"A real conversation without spectators is how real issues get resolved. You kept your dignity AND held her accountable."}},
-      {emoji:"😞",text:"Do nothing. Maybe she didn't mean it like that.",delta:-12,fb:{type:"neg",emoji:"🛑",title:"Making excuses for people who hurt you ain't loyalty.",sub:"Doing nothing teaches people what they can get away with. You deserve better."}}
-    ]
-  },
-  {
-    location:"📍 Classroom • Period 3",
-    title:"The Pressure Play",
-    art:"📚",
-    speaker:"Your Classmate Jordan",
-    text:`Jordan leans over: "Aye, just let me copy your homework real quick. I'll make it look different, nobody'll know. We boys right? You not gonna leave me hangin'?"`,
-    choices:[
-      {emoji:"😬",text:"Give him the homework. You don't want the beef.",delta:-14,fb:{type:"neg",emoji:"😮",title:"That's people-pleasing, not loyalty.",sub:"People who use guilt to get what they want are draining your energy. Doing right by you is always allowed."}},
-      {emoji:"💪",text:"'Nah I'm good. You had time to do it.' Keep it moving.",delta:+18,fb:{type:"pos",emoji:"🔒",title:"That's a BOUNDARY. And you held it.",sub:"Saying no — without drama, without apology — is one of the most mentally healthy things you can do."}},
-      {emoji:"🤔",text:"Offer to help him actually understand it instead.",delta:+15,fb:{type:"pos",emoji:"🤝",title:"That's actual friendship.",sub:"You said no to the shortcut but offered real support. That's how you build relationships that actually mean something."}},
-      {emoji:"😤",text:"Snap on him in front of everyone.",delta:-8,fb:{type:"neg",emoji:"😬",title:"Unnecessary drama.",sub:"You can stand your ground without creating a scene. Public embarrassment just creates enemies and more stress for YOU."}}
-    ]
-  },
-  {
-    location:"📍 School Steps • After School",
-    title:"The Block Energy",
-    art:"🌆",
-    speaker:"The Scene",
-    text:`Older kids are on the corner you walk past every day. They keep calling you over to skip your after-school program. "It's lit over here, what you doin' going to that corny program?"`,
-    choices:[
-      {emoji:"😎",text:"'I got moves to make.' Keep walking.",delta:+20,fb:{type:"pos",emoji:"🚀",title:"YOU chose your path. That's everything.",sub:"It takes real strength to walk away from peer pressure, especially when it feels cool to stay. You protected your future self."}},
-      {emoji:"😟",text:"Stay with them. You don't wanna seem scared.",delta:-18,fb:{type:"neg",emoji:"⚠️",title:"Avoiding certain situations is a skill, not softness.",sub:"Situations that don't serve your growth can quickly spiral. Your future is worth more than fitting in."}},
-      {emoji:"🤷",text:"Tell them the program is actually fire and keep it moving.",delta:+12,fb:{type:"pos",emoji:"😤",title:"Low key inspiring tbh.",sub:"You didn't lie, didn't shrink yourself, and didn't follow the crowd. That kind of confidence is built scene by scene."}},
-      {emoji:"😬",text:"Go just for a few minutes, then dip.",delta:-10,fb:{type:"neg",emoji:"🕐",title:"'Just a few minutes' rarely is.",sub:"Putting yourself in situations that could go sideways is a vibe drain you don't need."}}
-    ]
-  },
-  {
-    location:"📍 Your Room • 9pm",
-    title:"The Scroll Hole",
-    art:"🌙",
-    speaker:"Your Own Thoughts",
-    text:`You've been scrolling for two hours. Everyone online looks happy, successful, like they got it figured out. You start comparing yourself to their highlight reels and your chest feels heavy.`,
-    choices:[
-      {emoji:"📵",text:"Put the phone face down. Go walk or stretch instead.",delta:+20,fb:{type:"pos",emoji:"🌿",title:"That's self-regulation and it's elite.",sub:"Research shows 10 minutes of movement literally shifts your brain chemistry. You chose your peace over the scroll hole."}},
-      {emoji:"📝",text:"Write down 3 things YOU actually did today.",delta:+15,fb:{type:"pos",emoji:"💛",title:"Counting your own wins? Different.",sub:"Gratitude and self-acknowledgment rewire your brain away from comparison. That's science AND self-love."}},
-      {emoji:"😮‍💨",text:"Keep scrolling. Maybe something will make you feel better.",delta:-15,fb:{type:"neg",emoji:"🌀",title:"The scroll doesn't heal it — it deepens it.",sub:"Social media comparison is engineered to make you feel less than. Your story unfolds at your own pace."}},
-      {emoji:"😴",text:"Throw on some music and go to sleep early.",delta:+10,fb:{type:"pos",emoji:"💤",title:"Rest is not weakness — it's recovery.",sub:"Sleep is when your brain literally heals and resets. Choosing rest is choosing yourself."}}
-    ]
-  },
-  {
-    location:"📍 School Counselor's Office",
-    title:"The Real Talk",
-    art:"🪑",
-    speaker:"Mr. Brooks, School Counselor",
-    text:`Mr. Brooks stops you: "Hey, I noticed you seem like you been carrying something heavy lately. My door is always open — no pressure, no judgment."`,
-    choices:[
-      {emoji:"😶",text:"'I'm good.' Walk off. You don't do that therapy stuff.",delta:-12,fb:{type:"neg",emoji:"🚪",title:"Real ones ask for help.",sub:"Refusing support isn't strength — it's isolation. The strongest athletes in the world have coaches. Your mind deserves one too."}},
-      {emoji:"✅",text:"'Actually yeah — let me come by after class.'",delta:+22,fb:{type:"pos",emoji:"💪",title:"THAT took courage. Real talk.",sub:"Asking for help is one of the most powerful things a person can do. You just chose yourself in a major way."}},
-      {emoji:"🤔",text:"'Maybe. I'll think about it.' And actually mean it.",delta:+10,fb:{type:"pos",emoji:"🌱",title:"That's a start.",sub:"Even considering help is growth. The door being open is enough for now — and that's okay."}},
-      {emoji:"😤",text:"'I handle my own stuff.' But make a mental note.",delta:+5,fb:{type:"pos",emoji:"💭",title:"At least you're thinking about it.",sub:"Your pride is understandable. But keeping that door cracked in your mind? That's self-awareness."}}
-    ]
-  },
-  {
-    location:"📍 The Cafeteria • Next Week",
-    title:"New Energy, New Table",
-    art:"🍽️",
-    speaker:"Amara, a classmate",
-    text:`Amara waves you over to her table — a group that's always laughing, talking music, art, coding. You've never really talked to them but the vibe looks completely different from the usual drama.`,
-    choices:[
-      {emoji:"😰",text:"Stay at your usual spot. New people is awkward.",delta:-5,fb:{type:"neg",emoji:"🔁",title:"Staying comfortable keeps you stuck.",sub:"The people you surround yourself with literally shape your mental health. New energy can change everything."}},
-      {emoji:"😊",text:"Walk over. Introduce yourself. One step.",delta:+20,fb:{type:"pos",emoji:"🌟",title:"That's growth personified.",sub:"Putting yourself out there when you don't have to is a confidence move. Good relationships don't find you — you find them."}},
-      {emoji:"👀",text:"Watch from a distance first, see if they're actually cool.",delta:+5,fb:{type:"pos",emoji:"🧐",title:"Cautious, but at least you're open.",sub:"Observing before moving is fine. Just don't let fear make the final call."}},
-      {emoji:"🤝",text:"Walk over: 'This seat open?' Keep it simple.",delta:+18,fb:{type:"pos",emoji:"🔥",title:"Simple. Confident. Real.",sub:"Confidence isn't loud — sometimes it's just taking one small step. That table could change your whole year."}}
-    ]
-  },
-  {
-    location:"📍 Mirror • Your Bedroom",
-    title:"The Final Check",
-    art:"🪞",
-    speaker:"You — to yourself",
-    text:`It's been a week of choices. The noise from Marcus, Keisha, Jordan — it's faded. But something in your chest hasn't faded. A quiet kind of strength. You ask yourself: "What do I actually believe about myself?"`,
-    choices:[
-      {emoji:"👑",text:"'I'm the main character of my own life. Nobody changes that.'",delta:+25,fb:{type:"pos",emoji:"👑",title:"That's it. That's the whole game.",sub:"Self-belief built through your own choices is unshakeable. Nobody gave it to you — you built it."}},
-      {emoji:"😌",text:"'I'm still figuring it out — and that's okay.'",delta:+20,fb:{type:"pos",emoji:"🌱",title:"Growth mindset. That's elite.",sub:"Knowing you're a work in progress and being at peace with it? That's wisdom most adults never find."}},
-      {emoji:"😕",text:"'I don't know. I still feel behind everyone else.'",delta:-5,fb:{type:"neg",emoji:"💛",title:"That feeling is real — but it's not the truth.",sub:"Comparison is the thief of joy. Your timeline is yours. Keep going anyway."}},
-      {emoji:"💪",text:"'Every hard choice I made this week was for ME.'",delta:+22,fb:{type:"pos",emoji:"🚀",title:"LOCKED. IN.",sub:"You've been building mental resilience all week. That's not luck — that's you."}}
-    ]
-  }
+// ── STATE ──────────────────────────────────────────────
+let vibe=50, sceneIndex=0, playerName='', vibeHistory=[], timerTO=null;
+
+// ── SCENES ─────────────────────────────────────────────
+const scenes=[
+  {location:"📍 School Hallway • Monday 8am",title:"First Day Back",art:"🏫",speaker:"Your Homie Dre",
+   text:`"Aye, you hear what Marcus been sayin'? He out here telling everyone you snitched 'cause you told the teacher about the fight. The whole school on it."`,
+   choices:[
+    {emoji:"😤",text:"Go find Marcus rn and check him in front of everyone",delta:-15,fb:{type:"neg",emoji:"💀",title:"Nah fam, that ain't it.",sub:"Confronting him publicly just adds fuel to the fire. You gave away your peace for drama that won't last."}},
+    {emoji:"🧘",text:"Deadass — let it go. Anyone who believes that don't know me.",delta:+18,fb:{type:"pos",emoji:"✨",title:"That's main character energy!",sub:"You chose your peace over the noise. Real ones who know you will always know. Don't let cap live rent free in your head."}},
+    {emoji:"😔",text:"Lowkey hurt. Go to the bathroom and stress alone.",delta:-8,fb:{type:"neg",emoji:"💭",title:"Bottling it up ain't healthy either.",sub:"It's okay to feel hurt — but isolating and stressing solo drains your vibe. Try talking to someone you trust."}},
+    {emoji:"🗣️",text:"Tell Dre to drop it, then walk to class with your head up.",delta:+12,fb:{type:"pos",emoji:"🔥",title:"Locked in!",sub:"You kept your composure AND redirected the energy. That's emotional intelligence. That's power."}}
+  ]},
+  {location:"📍 Lunch Table • 12:15pm",title:"The Group Chat Move",art:"📱",speaker:"The Situation",
+   text:`You open your phone and your "friend" Keisha posted something personal you told her in the group chat. Everybody's reacting with laughing emojis. Your chest gets tight.`,
+   choices:[
+    {emoji:"😡",text:"Send the most savage clapback. She violated.",delta:-10,fb:{type:"neg",emoji:"⚡",title:"The satisfaction is temporary.",sub:"A clapback feels good for 2 minutes, but dragging it in the group chat keeps you stuck in the toxicity."}},
+    {emoji:"🚪",text:"Leave the group chat. Right now. No explanation.",delta:+20,fb:{type:"pos",emoji:"🚀",title:"THAT'S how you remove toxicity!",sub:"No arguing, no begging. You just removed yourself. Removing access to your life is always an option."}},
+    {emoji:"🤝",text:"Confront Keisha privately and calmly — no audience.",delta:+15,fb:{type:"pos",emoji:"💬",title:"Facts. Handle it like an adult.",sub:"A real conversation without spectators is how real issues get resolved. You kept your dignity AND held her accountable."}},
+    {emoji:"😞",text:"Do nothing. Maybe she didn't mean it like that.",delta:-12,fb:{type:"neg",emoji:"🛑",title:"Making excuses for people who hurt you ain't loyalty.",sub:"Doing nothing teaches people what they can get away with. You deserve better."}}
+  ]},
+  {location:"📍 Classroom • Period 3",title:"The Pressure Play",art:"📚",speaker:"Your Classmate Jordan",
+   text:`Jordan leans over: "Aye, just let me copy your homework real quick. I'll make it look different, nobody'll know. We boys right? You not gonna leave me hangin'?"`,
+   choices:[
+    {emoji:"😬",text:"Give him the homework. You don't want the beef.",delta:-14,fb:{type:"neg",emoji:"😮",title:"That's people-pleasing, not loyalty.",sub:"People who use guilt to get what they want are draining your energy. Doing right by you is always allowed."}},
+    {emoji:"💪",text:"'Nah I'm good. You had time to do it.' Keep it moving.",delta:+18,fb:{type:"pos",emoji:"🔒",title:"That's a BOUNDARY. And you held it.",sub:"Saying no — without drama, without apology — is one of the most mentally healthy things you can do."}},
+    {emoji:"🤔",text:"Offer to help him actually understand it instead.",delta:+15,fb:{type:"pos",emoji:"🤝",title:"That's actual friendship.",sub:"You said no to the shortcut but offered real support. That's how you build relationships that actually mean something."}},
+    {emoji:"😤",text:"Snap on him in front of everyone.",delta:-8,fb:{type:"neg",emoji:"😬",title:"Unnecessary drama.",sub:"You can stand your ground without creating a scene. Public embarrassment just creates enemies and more stress for YOU."}}
+  ]},
+  {location:"📍 School Steps • After School",title:"The Block Energy",art:"🌆",speaker:"The Scene",
+   text:`Older kids are on the corner you walk past every day. They keep calling you over to skip your after-school program. "It's lit over here, what you doin' going to that corny program?"`,
+   choices:[
+    {emoji:"😎",text:"'I got moves to make.' Keep walking.",delta:+20,fb:{type:"pos",emoji:"🚀",title:"YOU chose your path. That's everything.",sub:"It takes real strength to walk away from peer pressure, especially when it feels cool to stay. You protected your future self."}},
+    {emoji:"😟",text:"Stay with them. You don't wanna seem scared.",delta:-18,fb:{type:"neg",emoji:"⚠️",title:"Avoiding certain situations is a skill, not softness.",sub:"Situations that don't serve your growth can quickly spiral. Your future is worth more than fitting in."}},
+    {emoji:"🤷",text:"Tell them the program is actually fire and keep it moving.",delta:+12,fb:{type:"pos",emoji:"😤",title:"Low key inspiring tbh.",sub:"You didn't lie, didn't shrink yourself, and didn't follow the crowd. That kind of confidence is built scene by scene."}},
+    {emoji:"😬",text:"Go just for a few minutes, then dip.",delta:-10,fb:{type:"neg",emoji:"🕐",title:"'Just a few minutes' rarely is.",sub:"Putting yourself in situations that could go sideways is a vibe drain you don't need."}}
+  ]},
+  {location:"📍 Your Room • 9pm",title:"The Scroll Hole",art:"🌙",speaker:"Your Own Thoughts",
+   text:`You've been scrolling for two hours. Everyone online looks happy, successful, like they got it figured out. You start comparing yourself to their highlight reels and your chest feels heavy.`,
+   choices:[
+    {emoji:"📵",text:"Put the phone face down. Go walk or stretch instead.",delta:+20,fb:{type:"pos",emoji:"🌿",title:"That's self-regulation and it's elite.",sub:"Research shows 10 minutes of movement literally shifts your brain chemistry. You chose your peace over the scroll hole."}},
+    {emoji:"📝",text:"Write down 3 things YOU actually did today.",delta:+15,fb:{type:"pos",emoji:"💛",title:"Counting your own wins? Different.",sub:"Gratitude and self-acknowledgment rewire your brain away from comparison. That's science AND self-love."}},
+    {emoji:"😮‍💨",text:"Keep scrolling. Maybe something will make you feel better.",delta:-15,fb:{type:"neg",emoji:"🌀",title:"The scroll doesn't heal it — it deepens it.",sub:"Social media comparison is engineered to make you feel less than. Your story unfolds at your own pace."}},
+    {emoji:"😴",text:"Throw on some music and go to sleep early.",delta:+10,fb:{type:"pos",emoji:"💤",title:"Rest is not weakness — it's recovery.",sub:"Sleep is when your brain literally heals and resets. Choosing rest is choosing yourself."}}
+  ]},
+  {location:"📍 School Counselor's Office",title:"The Real Talk",art:"🪑",speaker:"Mr. Brooks, School Counselor",
+   text:`Mr. Brooks stops you: "Hey, I noticed you seem like you been carrying something heavy lately. My door is always open — no pressure, no judgment."`,
+   choices:[
+    {emoji:"😶",text:"'I'm good.' Walk off. You don't do that therapy stuff.",delta:-12,fb:{type:"neg",emoji:"🚪",title:"Real ones ask for help.",sub:"Refusing support isn't strength — it's isolation. The strongest athletes in the world have coaches. Your mind deserves one too."}},
+    {emoji:"✅",text:"'Actually yeah — let me come by after class.'",delta:+22,fb:{type:"pos",emoji:"💪",title:"THAT took courage. Real talk.",sub:"Asking for help is one of the most powerful things a person can do. You just chose yourself in a major way."}},
+    {emoji:"🤔",text:"'Maybe. I'll think about it.' And actually mean it.",delta:+10,fb:{type:"pos",emoji:"🌱",title:"That's a start.",sub:"Even considering help is growth. The door being open is enough for now — and that's okay."}},
+    {emoji:"😤",text:"'I handle my own stuff.' But make a mental note.",delta:+5,fb:{type:"pos",emoji:"💭",title:"At least you're thinking about it.",sub:"Your pride is understandable. But keeping that door cracked in your mind? That's self-awareness."}}
+  ]},
+  {location:"📍 The Cafeteria • Next Week",title:"New Energy, New Table",art:"🍽️",speaker:"Amara, a classmate",
+   text:`Amara waves you over to her table — a group that's always laughing, talking music, art, coding. You've never really talked to them but the vibe looks completely different from the usual drama.`,
+   choices:[
+    {emoji:"😰",text:"Stay at your usual spot. New people is awkward.",delta:-5,fb:{type:"neg",emoji:"🔁",title:"Staying comfortable keeps you stuck.",sub:"The people you surround yourself with literally shape your mental health. New energy can change everything."}},
+    {emoji:"😊",text:"Walk over. Introduce yourself. One step.",delta:+20,fb:{type:"pos",emoji:"🌟",title:"That's growth personified.",sub:"Putting yourself out there when you don't have to is a confidence move. Good relationships don't find you — you find them."}},
+    {emoji:"👀",text:"Watch from a distance first, see if they're actually cool.",delta:+5,fb:{type:"pos",emoji:"🧐",title:"Cautious, but at least you're open.",sub:"Observing before moving is fine. Just don't let fear make the final call."}},
+    {emoji:"🤝",text:"Walk over: 'This seat open?' Keep it simple.",delta:+18,fb:{type:"pos",emoji:"🔥",title:"Simple. Confident. Real.",sub:"Confidence isn't loud — sometimes it's just taking one small step. That table could change your whole year."}}
+  ]},
+  {location:"📍 Mirror • Your Bedroom",title:"The Final Check",art:"🪞",speaker:"You — to yourself",
+   text:`It's been a week of choices. The noise from Marcus, Keisha, Jordan — it's faded. But something in your chest hasn't faded. A quiet kind of strength. You ask yourself: "What do I actually believe about myself?"`,
+   choices:[
+    {emoji:"👑",text:"'I'm the main character of my own life. Nobody changes that.'",delta:+25,fb:{type:"pos",emoji:"👑",title:"That's it. That's the whole game.",sub:"Self-belief built through your own choices is unshakeable. Nobody gave it to you — you built it."}},
+    {emoji:"😌",text:"'I'm still figuring it out — and that's okay.'",delta:+20,fb:{type:"pos",emoji:"🌱",title:"Growth mindset. That's elite.",sub:"Knowing you're a work in progress and being at peace with it? That's wisdom most adults never find."}},
+    {emoji:"😕",text:"'I don't know. I still feel behind everyone else.'",delta:-5,fb:{type:"neg",emoji:"💛",title:"That feeling is real — but it's not the truth.",sub:"Comparison is the thief of joy. Your timeline is yours. Keep going anyway."}},
+    {emoji:"💪",text:"'Every hard choice I made this week was for ME.'",delta:+22,fb:{type:"pos",emoji:"🚀",title:"LOCKED. IN.",sub:"You've been building mental resilience all week. That's not luck — that's you."}}
+  ]}
 ];
 
-// ── NAVIGATION ─────────────────────────
+// ── NAVIGATION ─────────────────────────────────────────
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  const el = document.getElementById(id);
-  el.classList.add('active');
-  el.scrollTop = 0;
+  const el=document.getElementById(id);
+  el.classList.add('active','fade-in');
+  el.scrollTop=0;
+  setTimeout(()=>el.classList.remove('fade-in'),400);
 }
 
 function showTips(){
@@ -565,96 +392,35 @@ function showTips(){
 }
 
 function startGame(){
-  vibe = 50; sceneIndex = 0;
+  // Resume audio context on user gesture
+  try{ getAudio().resume(); }catch(e){}
+  playerName=(document.getElementById('player-name').value.trim())||'You';
+  vibe=50; sceneIndex=0; vibeHistory=[];
+  soundStart();
   document.getElementById('hud').classList.add('visible');
   showScreen('game-screen');
   loadScene(0);
 }
 
-function restartGame(){ startGame(); }
+function restartGame(){ showScreen('title-screen'); }
 
-// ── HUD ────────────────────────────────
+// ── HUD ────────────────────────────────────────────────
 function updateHUD(){
-  const v = Math.max(0, Math.min(100, vibe));
-  document.getElementById('meter-fill').style.width = v+'%';
-  document.getElementById('meter-val').textContent = v;
-  document.getElementById('scene-pill').textContent = `${sceneIndex+1}/8`;
+  const v=Math.max(0,Math.min(100,vibe));
+  document.getElementById('meter-fill').style.width=v+'%';
+  document.getElementById('meter-val').textContent=v;
+  document.getElementById('scene-pill').textContent=`${sceneIndex+1}/8`;
 }
 
-// ── LOAD SCENE ─────────────────────────
+// ── LOAD SCENE ─────────────────────────────────────────
 function loadScene(idx){
-  const s = scenes[idx];
-  document.getElementById('scene-location').textContent = s.location;
-  document.getElementById('scene-title').textContent = s.title;
-  document.getElementById('scene-art').textContent = s.art;
-  document.getElementById('scene-speaker').textContent = s.speaker;
-  document.getElementById('scene-text').textContent = s.text;
+  const s=scenes[idx];
+  document.getElementById('scene-location').textContent=s.location;
+  document.getElementById('scene-title').textContent=s.title;
+  document.getElementById('scene-art').textContent=s.art;
+  document.getElementById('scene-speaker').textContent=s.speaker;
+  // Personalize text with player name
+  document.getElementById('scene-text').textContent=
+    s.text.replace(/\bYou\b/g, playerName==='You'?'You':playerName);
 
-  const wrap = document.getElementById('choices');
-  wrap.innerHTML = '';
-  s.choices.forEach(c=>{
-    const btn = document.createElement('button');
-    btn.className = 'choice-btn';
-    btn.innerHTML = `<span class="choice-emoji">${c.emoji}</span><span>${c.text}</span>`;
-    btn.onclick = ()=>makeChoice(c);
-    wrap.appendChild(btn);
-  });
-
-  document.getElementById('game-screen').scrollTop = 0;
-  updateHUD();
-}
-
-// ── MAKE CHOICE ────────────────────────
-function makeChoice(choice){
-  document.querySelectorAll('.choice-btn').forEach(b=>b.disabled=true);
-
-  vibe = Math.max(0, Math.min(100, vibe + choice.delta));
-  updateHUD();
-
-  const fb = document.getElementById('feedback');
-  fb.className = `show feedback-${choice.fb.type === 'pos' ? 'positive' : 'negative'}`;
-  document.getElementById('fb-emoji').textContent = choice.fb.emoji;
-  document.getElementById('fb-title').textContent = choice.fb.title;
-  document.getElementById('fb-sub').textContent   = choice.fb.sub;
-
-  // Tap to skip or auto-advance
-  const advance = ()=>{
-    fb.classList.remove('show');
-    fb.removeEventListener('click', advance);
-    sceneIndex++;
-    if(sceneIndex >= scenes.length) showEndScreen();
-    else loadScene(sceneIndex);
-  };
-
-  fb.addEventListener('click', advance);
-  setTimeout(advance, 3000);
-}
-
-// ── END SCREEN ─────────────────────────
-function showEndScreen(){
-  document.getElementById('hud').classList.remove('visible');
-  showScreen('end-screen');
-  const v = Math.max(0, Math.min(100, vibe));
-  let badge, title, msg;
-  if(v >= 85){
-    badge='👑'; title='MAIN CHARACTER';
-    msg='You played the whole game choosing YOU. Handled drama with class, set boundaries like a boss, and refused to let toxic energy live rent free. That\'s not just a game score — that\'s a real life skill set.';
-  } else if(v >= 65){
-    badge='🔥'; title='LOCKED IN';
-    msg='You made mostly power moves. A few slips, but you bounced back — which is exactly what real resilience looks like. Keep building.';
-  } else if(v >= 40){
-    badge='🌱'; title='GROWING';
-    msg='Some tough calls, some missed ones. But you finished and that matters. Real growth is slow and bumpy. The fact you\'re thinking about this puts you ahead.';
-  } else {
-    badge='💛'; title='KEEP GOING';
-    msg='The situations got heavy. But guess what? That\'s real life sometimes. The point isn\'t perfection — it\'s awareness. Now you know what to watch for.';
-  }
-  document.getElementById('end-badge').textContent = badge;
-  document.getElementById('end-title').textContent = title;
-  document.getElementById('end-score').textContent = `Vibe Score: ${v} / 100`;
-  document.getElementById('end-msg').textContent = msg;
-}
-</script>
-</body>
-</html>
-                                               
+  const wrap=document.getElementB
