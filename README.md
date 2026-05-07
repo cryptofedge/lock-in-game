@@ -21,7 +21,7 @@ This game teaches those skills through situations kids actually face.
 
 ---
 
-## ≡ƒÄ« How to Play
+## 🎮 How to Play
 
 1. Open `index.html` in any browser - no install needed
 2. Navigate through **8 real-life school scenarios**
@@ -31,7 +31,7 @@ This game teaches those skills through situations kids actually face.
 
 ---
 
-## ≡ƒîå Scenarios Include
+## 🎭 Scenarios Include
 
 | Scene | Location | Topic |
 |-------|----------|-------|
@@ -55,19 +55,19 @@ This game teaches those skills through situations kids actually face.
 
 ---
 
-## ≡ƒôü Files
+## 📜 Files
 
 ```
 lock-in-game/
-Γö£ΓöÇΓöÇ index.html        ΓåÉ The full game (single file, zero dependencies)
-Γö£ΓöÇΓöÇ logo.png          ΓåÉ FEDGE 2.O logo, transparent background
-Γö£ΓöÇΓöÇ FEDGE-2O-Logo.png ΓåÉ FEDGE 2.O brand logo
-ΓööΓöÇΓöÇ README.md         ΓåÉ You're here
+├── index.html        ΓåÉ The full game (single file, zero dependencies)
+├── logo.png          ΓåÉ FEDGE 2.O logo, transparent background
+├── FEDGE-2O-Logo.png ΓåÉ FEDGE 2.O brand logo
+└── README.md         ΓåÉ You're here
 ```
 
 ---
 
-## ≡ƒÆ¼ Crisis Resources
+## 🆘 Crisis Resources
 
 This game is for education and empowerment. If you or someone you know is struggling:
 
@@ -77,13 +77,13 @@ This game is for education and empowerment. If you or someone you know is strugg
 
 ---
 
-## ≡ƒÜÇ Built by FEDGE 2.O
+## 🚀 Built by FEDGE 2.O
 
 *Built to build mental strength and confidence in the next generation.*
 
 ---
 
-## ≡ƒôä License
+## 📄 License
 
 © 2026 FEDGE 2.O. All rights reserved.
 
@@ -129,5 +129,6 @@ Email: **cryptofedge@gmail.com**
 ---
 
 **Learn more:** [Full License](https://github.com/cryptofedge/lock-in-game/blob/main/LICENSE)
+
 
 
