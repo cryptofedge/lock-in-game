@@ -1,4 +1,4 @@
-﻿# 🔒 LOCK IN - The Mental Health Game
+﻿﻿# 🔒 LOCK IN - The Mental Health Game
 
 > *A choice-based mental health game for urban youth. Built to build.*
 
