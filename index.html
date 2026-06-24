@@ -298,6 +298,58 @@ h1.game-title{
 .ib-actions{display:flex;flex-direction:column;gap:6px;flex-shrink:0;}
 .ib-btn-yes{position:relative;overflow:hidden;padding:8px 14px;border-radius:50px;border:none;background:linear-gradient(135deg,var(--orange),var(--yellow));color:var(--dark);font-weight:800;font-size:.72rem;cursor:pointer;white-space:nowrap;}
 .ib-btn-no{padding:6px 14px;border-radius:50px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.4);font-size:.68rem;cursor:pointer;white-space:nowrap;}
+
+
+/* ── FEDGE 2.O CHATBOT ── */
+#chat-btn{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom,0px));right:16px;z-index:9800;
+  width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#4f46e5);
+  border:2px solid rgba(124,58,237,.5);box-shadow:0 4px 20px rgba(124,58,237,.5);
+  font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:transform .2s;}
+#chat-btn:active{transform:scale(.9);}
+#chat-panel{position:fixed;inset:0;z-index:9900;display:flex;flex-direction:column;
+  justify-content:flex-end;pointer-events:none;transition:all .3s;}
+#chat-panel.open{pointer-events:all;}
+#chat-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.65);opacity:0;
+  transition:opacity .3s;backdrop-filter:blur(4px);}
+#chat-panel.open #chat-backdrop{opacity:1;}
+#chat-sheet{background:#0d0d1f;border-radius:24px 24px 0 0;border-top:1px solid #2a2a55;
+  max-height:78vh;display:flex;flex-direction:column;
+  transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);}
+#chat-panel.open #chat-sheet{transform:translateY(0);}
+.chat-header{display:flex;align-items:center;gap:12px;padding:16px 18px 12px;
+  border-bottom:1px solid #2a2a55;flex-shrink:0;}
+.chat-avatar-f2{width:40px;height:40px;border-radius:50%;
+  background:linear-gradient(135deg,#7c3aed,#4f46e5);
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  box-shadow:0 0 10px rgba(124,58,237,.4);}
+.chat-title-f2{flex:1;}
+.chat-title-f2 strong{display:block;font-size:14px;font-weight:900;color:#f0f0ff;}
+.chat-title-f2 span{font-size:10px;color:#00e676;font-weight:700;letter-spacing:.5px;}
+.chat-close-f2{font-size:20px;color:#7070a0;cursor:pointer;padding:4px 8px;}
+#chat-messages{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-height:180px;}
+.cmsg{max-width:86%;animation:f2fadeUp .2s ease;}
+@keyframes f2fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.cmsg.user{align-self:flex-end;}.cmsg.bot{align-self:flex-start;}
+.cbubble{padding:10px 14px;border-radius:16px;font-size:12px;line-height:1.7;font-family:Inter,sans-serif;}
+.cmsg.user .cbubble{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border-radius:16px 16px 4px 16px;}
+.cmsg.bot .cbubble{background:#13132a;border:1px solid #2a2a55;color:#f0f0ff;border-radius:16px 16px 16px 4px;}
+.ctyping{display:flex;gap:4px;padding:10px 14px;background:#13132a;border:1px solid #2a2a55;border-radius:16px 16px 16px 4px;width:fit-content;}
+.ctyping span{width:6px;height:6px;border-radius:50%;background:#7c3aed;animation:f2pulse 1.2s ease-in-out infinite;}
+.ctyping span:nth-child(2){animation-delay:.2s;}.ctyping span:nth-child(3){animation-delay:.4s;}
+@keyframes f2pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.csugg{display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px 4px;}
+.csugg-btn{background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.3);
+  border-radius:20px;padding:5px 12px;font-size:11px;color:#9b5de5;
+  cursor:pointer;font-weight:700;white-space:nowrap;font-family:Inter,sans-serif;}
+.cinput-row{display:flex;gap:8px;padding:12px 14px;border-top:1px solid #2a2a55;flex-shrink:0;
+  padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));}
+#chat-input-f2{flex:1;background:#13132a;border:1px solid #2a2a55;border-radius:12px;
+  padding:11px 14px;color:#f0f0ff;font-size:13px;outline:none;font-family:Inter,sans-serif;}
+#chat-input-f2:focus{border-color:#7c3aed;}
+#chat-send-f2{background:linear-gradient(135deg,#7c3aed,#4f46e5);border:none;border-radius:12px;
+  width:42px;height:42px;cursor:pointer;font-size:16px;color:#fff;flex-shrink:0;}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
@@ -1515,6 +1567,97 @@ function shareScore(){
       .catch(function(){ alert('Share this:\n\n'+shareText); });
   }
 }
+
+
+// ══ FEDGE 2.O CHATBOT [LOCK IN] ════════════════════════
+const F2_KB = [
+  {k:['how','play','start','rules','basics','what is'],a:"LOCK IN is a choice-based mental health game. You go through 8 real-life scenarios \u2014 school drama, fake friends, pressure, beef \u2014 and make decisions that affect your Vibe meter (0-100). Good choices raise your vibe. Bad ones drain it. At the end you get a score and a message from OG Ray. \ud83e\udde0"},
+  {k:['vibe','meter','score','health','energy'],a:"The Vibe meter starts at 50 and goes 0-100. Every choice either raises or lowers it. Above 65 is thriving. Below 30 is struggling. Your final vibe score determines your ending \u2014 from \ud83d\udc51 to \ud83d\udc9b. Target 65+ for the best outcome."},
+  {k:['og ray','mentor','guide','advisor','character','who is'],a:"OG Ray is your mentor \u2014 a street-wise elder who has seen it all. He shows up at the start and drops wisdom after key moments. Listen to him. He speaks from experience, not theory. His advice is real."},
+  {k:['streak','combo','fire','locked in','chain'],a:"When you make multiple good choices in a row you build a streak. \ud83d\udd25 Fire streaks give bonus vibe points and flash a special indicator. Breaking the streak with a bad choice resets it. Chain good decisions for maximum vibe gains."},
+  {k:['focus flow','mini game','phaser','warm up','bonus'],a:"Focus Flow is the Phaser 2D warm-up game. Toxic thoughts (STRESS, DRAMA, ANXIETY, FAKE FRIENDS) fall from the top \u2014 tap to pop them for +5 vibe each. GOOD vibes (FOCUS, PEACE, GROWTH) float down \u2014 avoid those. 18 seconds. Your bonus vibe carries into the main game! \ud83e\udde0"},
+  {k:['mindscape','three','3d','background','stars','nodes'],a:"The neural mindscape is a Three.js 3D scene running behind the game \u2014 38 floating nodes connected by glowing lines. It represents your mental state. It pulses and shifts based on what's happening. \ud83d\udd2e"},
+  {k:['tips','advice','strategy','win','how to win','best'],a:"FEDGE 2.O tips for LOCK IN:\n\n1. \ud83e\udde0 Play Focus Flow first to bank bonus vibe\n2. \ud83e\udd14 Slow down on each choice \u2014 the right answer usually takes courage\n3. \ud83d\udd25 Chain good choices to build streaks\n4. \ud83d\udcac Read OG Ray carefully \u2014 he signals the right move\n5. \ud83c\udf31 Target 65+ vibe for the best ending"},
+  {k:['mental health','anxiety','stress','real','education','purpose'],a:"LOCK IN is built around real mental health situations urban youth face every day. Every scenario is authentic \u2014 not preachy. OG Ray speaks from experience. The goal is helping you recognize toxic patterns and build mental tools to handle them. \ud83d\udc9b"},
+  {k:['fedge','who are you','what are you','eclat'],a:"I'm FEDGE 2.O \u2014 your game advisor from Eclat Universe. I know LOCK IN inside out: every scenario, every choice, OG Ray's wisdom, the Focus Flow mechanics. Ask me anything. \ud83d\udc8e"}
+];
+const F2_SUGG = ['How do I play?','Who is OG Ray?','Focus Flow tips?','How does vibe work?'];
+const F2_FALLBACKS = [
+  "Real talk — I don't have a specific answer for that right now. Try asking about how to play, mini-games, or strategy tips. 💎",
+  "Hmm, outside what I know right now. Ask me about the gameplay, scoring, or mechanics. 🎯",
+  "I'm locked in on LOCK IN right now. Ask me how to play, what a mechanic does, or how to win. 💰",
+];
+function f2Match(q){
+  const ql=q.toLowerCase();
+  for(const e of F2_KB){if(e.k.some(k=>ql.includes(k)))return e.a;}
+  return F2_FALLBACKS[Math.floor(Math.random()*F2_FALLBACKS.length)];
+}
+function openF2Chat(){
+  document.getElementById('chat-panel').classList.add('open');
+  const msgs=document.getElementById('chat-messages');
+  const sugg=document.getElementById('csugg');
+  if(!msgs.children.length){
+    sugg.innerHTML=F2_SUGG.map(s=>`<div class="csugg-btn" onclick="quickF2Ask('`+s+`')">`+s+`</div>`).join('');
+    f2BotMsg("What's good. I'm FEDGE 2.O \u2014 your advisor for LOCK IN. Ask me about OG Ray, vibe, Focus Flow, or any mechanic. Real talk only. \ud83d\udc8e");
+  }
+  setTimeout(()=>document.getElementById('chat-input-f2').focus(),350);
+}
+function closeF2Chat(){document.getElementById('chat-panel').classList.remove('open');}
+function f2BotMsg(txt){
+  const m=document.getElementById('chat-messages');
+  const d=document.createElement('div');d.className='cmsg bot';
+  d.innerHTML=`<div class="cbubble">`+txt.replace(/\n/g,'<br/>')+`</div>`;
+  m.appendChild(d);m.scrollTop=m.scrollHeight;
+}
+function f2UserMsg(txt){
+  const m=document.getElementById('chat-messages');
+  const d=document.createElement('div');d.className='cmsg user';
+  d.innerHTML=`<div class="cbubble">`+txt+`</div>`;
+  m.appendChild(d);m.scrollTop=m.scrollHeight;
+}
+function f2Typing(){
+  const m=document.getElementById('chat-messages');
+  const d=document.createElement('div');d.className='cmsg bot';d.id='f2typing';
+  d.innerHTML='<div class="ctyping"><span></span><span></span><span></span></div>';
+  m.appendChild(d);m.scrollTop=m.scrollHeight;
+}
+function f2StopTyping(){const e=document.getElementById('f2typing');if(e)e.remove();}
+function sendF2Chat(){
+  const i=document.getElementById('chat-input-f2');
+  const q=i.value.trim();if(!q)return;i.value='';
+  f2UserMsg(q);f2Typing();
+  setTimeout(()=>{f2StopTyping();f2BotMsg(f2Match(q));},500+Math.random()*400);
+}
+function quickF2Ask(q){
+  f2UserMsg(q);f2Typing();
+  setTimeout(()=>{f2StopTyping();f2BotMsg(f2Match(q));},500);
+}
+
 </script>
+
+
+<!-- FEDGE 2.O CHATBOT -->
+<button id="chat-btn" onclick="openF2Chat()" title="Ask FEDGE 2.O">&#128142;</button>
+<div id="chat-panel">
+  <div id="chat-backdrop" onclick="closeF2Chat()"></div>
+  <div id="chat-sheet">
+    <div class="chat-header">
+      <div class="chat-avatar-f2">&#128142;</div>
+      <div class="chat-title-f2">
+        <strong>FEDGE 2.O</strong>
+        <span>&#9679; ONLINE &middot; Game Advisor</span>
+      </div>
+      <div class="chat-close-f2" onclick="closeF2Chat()">&#10005;</div>
+    </div>
+    <div class="csugg" id="csugg"></div>
+    <div id="chat-messages"></div>
+    <div class="cinput-row">
+      <input id="chat-input-f2" type="text" placeholder="Ask FEDGE 2.O anything..."
+        onkeydown="if(event.key==='Enter')sendF2Chat()"/>
+      <button id="chat-send-f2" onclick="sendF2Chat()">&#10148;</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
