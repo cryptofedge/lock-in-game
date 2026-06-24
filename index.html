@@ -299,9 +299,13 @@ h1.game-title{
 .ib-btn-yes{position:relative;overflow:hidden;padding:8px 14px;border-radius:50px;border:none;background:linear-gradient(135deg,var(--orange),var(--yellow));color:var(--dark);font-weight:800;font-size:.72rem;cursor:pointer;white-space:nowrap;}
 .ib-btn-no{padding:6px 14px;border-radius:50px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.4);font-size:.68rem;cursor:pointer;white-space:nowrap;}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
 </head>
 <body>
 
+<canvas id="three-mind" style="position:fixed;inset:0;z-index:0;width:100%;height:100%;pointer-events:none;opacity:0.55;"></canvas>
+<div id="phaserWrap" style="display:none;position:fixed;inset:0;z-index:9999;background:#0a0a0f;"></div>
 <div id="stars"></div>
 <canvas id="confetti-canvas"></canvas>
 
@@ -386,6 +390,7 @@ h1.game-title{
   </div>
   <div style="width:100%;padding:0 28px;box-sizing:border-box;display:flex;flex-direction:column;gap:10px;margin-bottom:8px;">
     <button class="btn-primary" id="start-btn" onclick="startGame()">▶ START THE GAME</button>
+    <button class="btn-secondary" onclick="launchFocusFlow()" style="background:linear-gradient(135deg,rgba(155,93,229,.18),rgba(0,201,177,.12));border-color:rgba(155,93,229,.5);color:#9B5DE5;">🧠 Focus Flow — 2D Warm-Up</button>
     <button class="btn-secondary" onclick="showTips()">💡 Real Talk Tips</button>
   </div>
   <div style="height:60px"></div>
@@ -1345,6 +1350,153 @@ function buildVibeChart(){
     num.className='vh-num';
     num.textContent=h.scene;
     numsEl.appendChild(num);
+  });
+}
+
+// ── THREE.JS NEURAL MINDSCAPE ──────────────────────────
+(function initMindscape(){
+  if(!window.THREE) return;
+  const canvas = document.getElementById('three-mind');
+  const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 200);
+  camera.position.set(0, 0, 40);
+
+  const COLORS = [0x9B5DE5, 0x00C9B1, 0xF47C20, 0xFF6B6B, 0xFFD93D];
+  const nodes = [];
+  const nodeCount = 38;
+  const nodeGeo = new THREE.SphereGeometry(0.22, 8, 8);
+  for(let i=0; i<nodeCount; i++){
+    const mat = new THREE.MeshBasicMaterial({color: COLORS[i % COLORS.length]});
+    const mesh = new THREE.Mesh(nodeGeo, mat);
+    const theta = Math.random()*Math.PI*2, phi = Math.acos(2*Math.random()-1);
+    const r = 12 + Math.random()*14;
+    mesh.position.set(r*Math.sin(phi)*Math.cos(theta), r*Math.sin(phi)*Math.sin(theta), r*Math.cos(phi));
+    mesh.userData = {vx:(Math.random()-.5)*.012, vy:(Math.random()-.5)*.012, vz:(Math.random()-.5)*.012};
+    scene.add(mesh);
+    nodes.push(mesh);
+  }
+
+  const linePositions = new Float32Array(nodeCount*nodeCount*6);
+  const lineGeo = new THREE.BufferGeometry();
+  lineGeo.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
+  const lineMat = new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({color:0x9B5DE5, transparent:true, opacity:0.18}));
+  scene.add(lineMat);
+
+  let raf;
+  function animate(){
+    raf = requestAnimationFrame(animate);
+    nodes.forEach(n=>{
+      n.position.x += n.userData.vx; n.position.y += n.userData.vy; n.position.z += n.userData.vz;
+      const d = n.position.length();
+      if(d > 26){ n.position.multiplyScalar(26/d); n.userData.vx*=-1; n.userData.vy*=-1; n.userData.vz*=-1; }
+    });
+    let idx=0;
+    for(let a=0;a<nodes.length;a++) for(let b=a+1;b<nodes.length;b++){
+      const dist = nodes[a].position.distanceTo(nodes[b].position);
+      if(dist<10){ linePositions[idx++]=nodes[a].position.x; linePositions[idx++]=nodes[a].position.y; linePositions[idx++]=nodes[a].position.z; linePositions[idx++]=nodes[b].position.x; linePositions[idx++]=nodes[b].position.y; linePositions[idx++]=nodes[b].position.z; }
+      else{ for(let k=0;k<6;k++) linePositions[idx++]=0; }
+    }
+    lineGeo.attributes.position.needsUpdate=true;
+    camera.position.x = Math.sin(Date.now()*0.0002)*6;
+    camera.position.y = Math.cos(Date.now()*0.00015)*4;
+    camera.lookAt(0,0,0);
+    renderer.render(scene,camera);
+  }
+  animate();
+  window.addEventListener('resize',()=>{
+    renderer.setSize(window.innerWidth,window.innerHeight);
+    camera.aspect=window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+  });
+})();
+
+// ── PHASER FOCUS FLOW MINI-GAME ─────────────────────────
+let _pGame=null;
+function _pClose(result){
+  document.getElementById('phaserWrap').style.display='none';
+  if(_pGame){_pGame.destroy(true);_pGame=null;}
+  if(window._pCb){window._pCb(result);window._pCb=null;}
+}
+function _pLaunch(SceneClass,cb){
+  const wrap=document.getElementById('phaserWrap');
+  wrap.style.display='block';
+  if(_pGame){_pGame.destroy(true);_pGame=null;}
+  window._pCb=cb;
+  _pGame=new Phaser.Game({type:Phaser.CANVAS,width:window.innerWidth,height:window.innerHeight,parent:'phaserWrap',backgroundColor:'#0a0a0f',scene:[SceneClass],scale:{mode:Phaser.Scale.RESIZE}});
+}
+
+class FocusFlowScene extends Phaser.Scene {
+  constructor(){super({key:'FocusFlowScene'});}
+  create(){
+    const W=this.scale.width, H=this.scale.height;
+    this.score=0; this.timeLeft=18;
+    const bad=['STRESS','DRAMA','ANXIETY','PRESSURE','BEEF','FAKE FRIENDS','DOUBT','HATE'];
+    const good=['FOCUS','PEACE','GROWTH','LOVE','GRIND','CLARITY'];
+    this.add.text(W/2,H*0.08,'🧠 CLEAR YOUR HEAD',{fontFamily:'Orbitron,sans-serif',fontSize:'18px',color:'#9B5DE5',fontStyle:'bold'}).setOrigin(0.5);
+    this.add.text(W/2,H*0.14,'Tap RED thoughts · Avoid GREEN vibes',{fontFamily:'Inter,sans-serif',fontSize:'12px',color:'rgba(255,255,255,0.5)'}).setOrigin(0.5);
+    this.scoreText=this.add.text(W/2,H*0.21,'+0 VIBE',{fontFamily:'Orbitron,sans-serif',fontSize:'22px',color:'#00C9B1',fontStyle:'bold'}).setOrigin(0.5);
+    this.timerText=this.add.text(W-20,20,'18s',{fontFamily:'Inter,sans-serif',fontSize:'14px',color:'#FFD93D'}).setOrigin(1,0);
+    const barBg=this.add.rectangle(W/2,H*0.27,W-48,7,0x222233).setOrigin(0.5);
+    this.timerBar=this.add.rectangle(24,H*0.27,W-48,7,0xFFD93D).setOrigin(0,0.5);
+    this.thoughts=[];
+    this.spawnTimer=this.time.addEvent({delay:900,loop:true,callback:()=>{
+      const isBad=Math.random()>0.32;
+      const label=isBad?bad[Math.floor(Math.random()*bad.length)]:good[Math.floor(Math.random()*good.length)];
+      const x=48+Math.random()*(W-96);
+      const pill=this.add.container(x,-30);
+      const bg=this.add.rectangle(0,0,Math.max(label.length*8+24,80),34,isBad?0x330011:0x001a15,0.92).setStrokeStyle(1.5,isBad?0xFF6B6B:0x00C9B1);
+      const txt=this.add.text(0,0,label,{fontFamily:'Inter,sans-serif',fontSize:'12px',fontStyle:'bold',color:isBad?'#FF6B6B':'#00C9B1'}).setOrigin(0.5);
+      pill.add([bg,txt]);
+      pill.setInteractive(new Phaser.Geom.Rectangle(-60,-22,120,44),Phaser.Geom.Rectangle.Contains);
+      pill.userData={isBad,done:false};
+      pill.on('pointerdown',()=>{
+        if(pill.userData.done) return;
+        pill.userData.done=true;
+        if(isBad){
+          this.score+=5;
+          this.scoreText.setText('+'+this.score+' VIBE');
+          this.scoreText.setScale(1.3);
+          this.tweens.add({targets:this.scoreText,scaleX:1,scaleY:1,duration:200});
+          this.tweens.add({targets:pill,scaleX:1.4,scaleY:1.4,alpha:0,duration:220,onComplete:()=>pill.destroy()});
+          const burst=this.add.text(x,pill.y,'💥',{fontSize:'22px'}).setOrigin(0.5);
+          this.tweens.add({targets:burst,y:burst.y-40,alpha:0,duration:400,onComplete:()=>burst.destroy()});
+        } else {
+          this.score=Math.max(0,this.score-3);
+          this.scoreText.setText('+'+this.score+' VIBE');
+          this.cameras.main.shake(120,0.012);
+          this.tweens.add({targets:pill,alpha:0,duration:200,onComplete:()=>pill.destroy()});
+        }
+        pill.userData.done=true;
+      });
+      this.tweens.add({targets:pill,y:H+40,duration:4500+Math.random()*2000,ease:'Linear',onComplete:()=>{if(!pill.userData.done)pill.destroy();}});
+      this.thoughts.push(pill);
+    }});
+
+    this.countdownTimer=this.time.addEvent({delay:1000,loop:true,callback:()=>{
+      this.timeLeft--;
+      this.timerText.setText(this.timeLeft+'s');
+      this.timerBar.width=(W-48)*(this.timeLeft/18);
+      if(this.timeLeft<=0){
+        this.spawnTimer.remove();
+        this.countdownTimer.remove();
+        this.add.rectangle(W/2,H/2,W-40,120,0x0a0a0f,0.95).setOrigin(0.5);
+        this.add.text(W/2,H/2-22,'🔥 +'+this.score+' VIBE BOOST!',{fontFamily:'Orbitron,sans-serif',fontSize:'20px',color:'#FFD93D',fontStyle:'bold'}).setOrigin(0.5);
+        this.add.text(W/2,H/2+14,'Mind cleared. Time to LOCK IN →',{fontFamily:'Inter,sans-serif',fontSize:'12px',color:'rgba(255,255,255,0.6)'}).setOrigin(0.5);
+        this.time.delayedCall(2200,()=>_pClose({vibeBonus:this.score}));
+      }
+    }});
+  }
+}
+
+function launchFocusFlow(){
+  _pLaunch(FocusFlowScene,result=>{
+    if(result&&result.vibeBonus>0){
+      vibe=Math.min(100,vibe+Math.floor(result.vibeBonus/2));
+      updateMeter();
+    }
   });
 }
 
