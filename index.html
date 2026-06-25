@@ -1553,6 +1553,7 @@ function launchFocusFlow(){
 }
 
 // ── SHARE ──────────────────────────────────────────────
+function openLB(){var sc=Math.round(typeof vibe!=="undefined"?vibe:0);lbAutoSubmit(typeof playerName!=="undefined"?playerName:"You",sc,"Vibe: "+sc+"/100").then(()=>lbOpen());}
 function shareScore(){
   var v=Math.max(0,Math.min(100,vibe));
   var badge=v>=85?'👑':v>=65?'🔥':v>=40?'🌱':'💛';
