@@ -54,4 +54,25 @@ self.addEventListener('fetch', event => {
           if (res && res.status === 200) {
             caches.open(CACHE_NAME).then(c => c.put(req, res.clone()));
           }
-          return r
+          return res;
+        })
+        .catch(() => caches.match(req))
+    );
+    return;
+  }
+
+  // CACHE-FIRST for everything else (images, fonts, manifest)
+  event.respondWith(
+    caches.match(req).then(cached => {
+      if (cached) return cached;
+      return fetch(req)
+        .then(res => {
+          if (res && res.status === 200) {
+            caches.open(CACHE_NAME).then(c => c.put(req, res.clone()));
+          }
+          return res;
+        })
+        .catch(() => cached);
+    })
+  );
+});
