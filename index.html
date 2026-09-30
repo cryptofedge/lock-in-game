@@ -1,6 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- FEDGE PASSWORD GATE (start) -->
+<style id="fedge-gate-style">
+html.fg-locked,html.fg-locked body{overflow:hidden!important}
+html.fg-locked body>*:not(#fedge-gate){display:none!important}
+#fedge-gate{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:16px;background:radial-gradient(ellipse at 50% 30%,#1a0f05 0%,#03030a 70%);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#e8e8f0}
+#fedge-gate form{width:100%;max-width:360px;border:1px solid #2a2a3a;border-top:2px solid #e87012;background:#07070f;padding:32px 24px;text-align:center;box-shadow:0 0 60px rgba(232,112,18,.12)}
+#fedge-gate .fg-k{font-size:10px;letter-spacing:4px;color:#e87012;text-transform:uppercase}
+#fedge-gate h1{margin:10px 0 6px;font:900 26px/1.1 system-ui,-apple-system,Segoe UI,sans-serif;letter-spacing:2px;color:#fff}
+#fedge-gate p{margin:0 0 22px;font-size:12px;line-height:1.6;color:#8a8aa0}
+#fedge-gate input{width:100%;box-sizing:border-box;padding:14px;font:16px ui-monospace,monospace;color:#fff;background:#0d0d18;border:1px solid #2a2a3a;outline:none;text-align:center;letter-spacing:2px}
+#fedge-gate input:focus{border-color:#e87012}
+#fedge-gate button{width:100%;margin-top:12px;padding:14px;font:700 12px ui-monospace,monospace;letter-spacing:3px;text-transform:uppercase;color:#03030a;background:#e87012;border:0;cursor:pointer}
+#fedge-gate button:hover{background:#ff8a2a}
+#fedge-gate .fg-err{min-height:18px;margin-top:12px;font-size:11px;color:#ff5a5a}
+#fedge-gate a{display:inline-block;margin-top:14px;font-size:10px;letter-spacing:2px;color:#6a6a80;text-decoration:none;text-transform:uppercase}
+</style>
+<script>
+(function(){
+  var HASH='b26cb9266be0a95746f9cacca37393b549d843d7c2f2f041386f5ac1619b2d40', KEY='fedge_pass';
+  try{ if(localStorage.getItem(KEY)===HASH) return; }catch(e){}
+  var root=document.documentElement; root.classList.add('fg-locked');
+  function sha(t){ return crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)).then(function(b){
+    return Array.prototype.map.call(new Uint8Array(b),function(x){return ('0'+x.toString(16)).slice(-2)}).join('') }); }
+  function build(){
+    var g=document.createElement('div'); g.id='fedge-gate';
+    g.innerHTML='<form autocomplete="off"><div class="fg-k">FEDGE 2.O // Beta Access</div><h1>ENTER PASSWORD</h1>'+
+      '<p>This game is part of the FEDGE 2.O beta. Enter your access password to play.</p>'+
+      '<input type="password" aria-label="Password" placeholder="Password" required>'+
+      '<button type="submit">Unlock</button><div class="fg-err" role="alert"></div>'+
+      '<a href="https://fedge2o.com/#ecosystem">Get beta access at fedge2o.com</a></form>';
+    document.body.appendChild(g);
+    var f=g.querySelector('form'), i=g.querySelector('input'), e=g.querySelector('.fg-err');
+    setTimeout(function(){ i.focus(); },50);
+    f.addEventListener('submit',function(ev){ ev.preventDefault();
+      sha(i.value).then(function(h){
+        if(h===HASH){ try{localStorage.setItem(KEY,HASH)}catch(x){} g.remove(); root.classList.remove('fg-locked');
+          window.dispatchEvent(new Event('resize')); }
+        else { e.textContent='Wrong password. Try again.'; i.value=''; i.focus(); }
+      });
+    });
+  }
+  if(document.body) build(); else document.addEventListener('DOMContentLoaded',build);
+})();
+</script>
+<!-- FEDGE PASSWORD GATE (end) -->
+
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -351,7 +397,7 @@ h1.game-title{
   width:42px;height:42px;cursor:pointer;font-size:16px;color:#fff;flex-shrink:0;}
 
 </style>
-<script src="https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.159.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
 </head>
 <body>
